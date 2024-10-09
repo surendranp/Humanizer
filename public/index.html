@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Humanizer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">AI Text Humanizer</h1>
+        <div class="row " >
+            <div class="col-md-6 mb-3 ">
+                <p>Input Text:</p>
+                <textarea id="inputText" class="form-control" rows="10" placeholder="Enter AI-generated text here..."></textarea>
+                <p id="wordCount" class="mt-2">Word Count: 0</p>
+                <button id="submitBtn" class="btn btn-primary mt-2">Humanize Text</button>
+                <button id="retryBtn" class="btn btn-warning mt-2" style="display:none;">Retry</button>
+                <button id="clearBtn" class="btn btn-danger mt-2">Clear</button>
+            </div>
+            <div class="col-md-6">
+                <p>Transformed Text:</p>
+                <textarea id="humanizedText" class="form-control" readonly rows="10"></textarea>
+                <p id="outputWordCount" class="mt-2">Output Word Count: 0</p>
+                <div class="loader" id="loader" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
