@@ -44,17 +44,9 @@ const replaceSynonyms = (text) => {
     }).join(' ');
 };
 
-// Enhanced Sentence Restructuring
+// Sentence Restructuring
 const restructureSentence = (text) => {
-    // Add more complex restructuring if needed
-    return text.split('. ').map(sentence => {
-        const words = sentence.split(' ');
-        if (words.length > 1) {
-            // Swap first and last word of each sentence
-            [words[0], words[words.length - 1]] = [words[words.length - 1], words[0]];
-        }
-        return words.join(' ');
-    }).join('. ');
+    return text.replace(/(\w+)\s(\w+)/g, '$2 $1'); // Simple example: switches the first two words
 };
 
 // Add Personal Touches
@@ -66,6 +58,29 @@ const addPersonalTouches = (text) => {
     ];
     const randomPhrase = personalPhrases[Math.floor(Math.random() * personalPhrases.length)];
     return `${randomPhrase} ${text}`;
+};
+
+// Randomized Variations
+const commonVariations = [
+    "This might resonate with you.",
+    "You might find this interesting.",
+    "Here's something to ponder."
+];
+
+// Change Tone and Style
+const adjustTone = (text) => {
+    if (text.includes('urgent')) {
+        return text.replace('urgent', 'really important');
+    }
+    return text;
+};
+
+// Contextual Understanding
+const contextualModification = (text) => {
+    if (text.includes('disappointed')) {
+        return text.replace('disappointed', 'a bit let down');
+    }
+    return text;
 };
 
 // Function to handle the OpenAI API request with retries
@@ -82,20 +97,26 @@ const fetchHumanizedText = async (inputText) => {
     let modifiedText = replaceSynonyms(inputText);
     modifiedText = restructureSentence(modifiedText);
     modifiedText = addPersonalTouches(modifiedText);
+    modifiedText = adjustTone(modifiedText);
+    modifiedText = contextualModification(modifiedText);
+
+    // Append a random variation
+    const randomVariation = commonVariations[Math.floor(Math.random() * commonVariations.length)];
+    modifiedText += ` ${randomVariation}`;
 
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             { 
                 role: 'user', 
-                content: `Rewrite the following text in a highly human-like manner, ensuring it is plagiarism-free and undetectable by AI detectors. Focus on maintaining a natural style while minimizing any AI-like content:\n\n${modifiedText}` 
+                content: `Rewrite the following text in a human-like manner, ensuring it is plagiarism-free and undetectable by AI detectors, while minimizing AI-like content:\n\n${modifiedText}` 
             }
         ],
         max_tokens: maxTokens, // Dynamically set max_tokens based on input size
-        temperature: 0.35,      // Lowered temperature to further reduce randomness
+        temperature: 0.55,      // Further reduced to limit randomness
         top_p: 0.85,            // Adjusted for a tighter probability spread
-        frequency_penalty: 1.5, // Increased to penalize repetitive phrases more aggressively
-        presence_penalty: 1.0    // Encourage more diversity in the output
+        frequency_penalty: 1.2, // Increased to penalize repetitive phrases more aggressively
+        presence_penalty: 0.7   // Encourage more diversity in the output
     };
 
     try {
