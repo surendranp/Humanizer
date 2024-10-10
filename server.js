@@ -29,6 +29,60 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048); // Ensure it doesn't exceed OpenAI's max token limit
 };
 
+// Synonym Replacement
+const synonyms = {
+    "happy": "joyful",
+    "sad": "unhappy",
+    "difficult": "challenging",
+    // Add more synonyms as needed
+};
+
+// Function for synonym replacement
+const replaceSynonyms = (text) => {
+    return text.split(' ').map(word => {
+        return synonyms[word.toLowerCase()] || word;
+    }).join(' ');
+};
+
+// Sentence Restructuring
+const restructureSentence = (text) => {
+    return text.replace(/(\w+)\s(\w+)/g, '$2 $1'); // Simple example: switches the first two words
+};
+
+// Add Personal Touches
+const addPersonalTouches = (text) => {
+    const personalPhrases = [
+        "You know, it's like when you think about it...",
+        "Isn't it amazing how...",
+        "By the way, have you ever noticed..."
+    ];
+    const randomPhrase = personalPhrases[Math.floor(Math.random() * personalPhrases.length)];
+    return `${randomPhrase} ${text}`;
+};
+
+// Randomized Variations
+const commonVariations = [
+    "This might resonate with you.",
+    "You might find this interesting.",
+    "Here's something to ponder."
+];
+
+// Change Tone and Style
+const adjustTone = (text) => {
+    if (text.includes('urgent')) {
+        return text.replace('urgent', 'really important');
+    }
+    return text;
+};
+
+// Contextual Understanding
+const contextualModification = (text) => {
+    if (text.includes('disappointed')) {
+        return text.replace('disappointed', 'a bit let down');
+    }
+    return text;
+};
+
 // Function to handle the OpenAI API request with retries
 const fetchHumanizedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
@@ -39,12 +93,23 @@ const fetchHumanizedText = async (inputText) => {
 
     const maxTokens = estimateTokens(inputText); // Estimate max tokens dynamically based on input text
 
+    // Apply strategies
+    let modifiedText = replaceSynonyms(inputText);
+    modifiedText = restructureSentence(modifiedText);
+    modifiedText = addPersonalTouches(modifiedText);
+    modifiedText = adjustTone(modifiedText);
+    modifiedText = contextualModification(modifiedText);
+
+    // Append a random variation
+    const randomVariation = commonVariations[Math.floor(Math.random() * commonVariations.length)];
+    modifiedText += ` ${randomVariation}`;
+
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             { 
                 role: 'user', 
-                content: `Rewrite the following text in a human-like manner, maintaining the full length but ensuring it is plagiarism-free and undetectable by AI detectors:\n\n${inputText}` 
+                content: `Rewrite the following text in a human-like manner, maintaining the full length but ensuring it is plagiarism-free and undetectable by AI detectors:\n\n${modifiedText}` 
             }
         ],
         max_tokens: maxTokens, // Dynamically set max_tokens based on input size
