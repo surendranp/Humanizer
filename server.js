@@ -5,28 +5,27 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000; // Use the port from environment variables for hosting
+const port = process.env.PORT || 3000;
 
 // Middleware setup
 app.use(cors({
-    origin: '*', // Allow all origins
-    methods: 'GET,POST,PUT,DELETE,OPTIONS', // Allow specific methods
-    allowedHeaders: 'Content-Type,Authorization', // Allow specific headers
+    origin: '*', 
+    methods: 'GET,POST,PUT,DELETE,OPTIONS', 
+    allowedHeaders: 'Content-Type,Authorization', 
 }));
 
 app.use(bodyParser.json());
 
-// Serve the static files (like index.html, CSS, and JS)
-app.use(express.static('public')); // Serve static files from the 'public' directory
+// Serve the static files
+app.use(express.static('public'));
 
 // OpenAI API Key
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Function to estimate the number of tokens based on the input text length
+// Function to estimate the number of tokens based on input text length
 const estimateTokens = (inputText) => {
     const wordCount = inputText.split(/\s+/).length;
-    // Approximate number of tokens is roughly 1.33x the word count
-    return Math.min(Math.ceil(wordCount * 1.33), 2048); // Ensure it doesn't exceed OpenAI's max token limit
+    return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
 // Synonym Replacement
@@ -34,7 +33,6 @@ const synonyms = {
     "happy": "joyful",
     "sad": "unhappy",
     "difficult": "challenging",
-    // Add more synonyms as needed
 };
 
 // Function for synonym replacement
@@ -46,7 +44,7 @@ const replaceSynonyms = (text) => {
 
 // Sentence Restructuring
 const restructureSentence = (text) => {
-    return text.replace(/(\w+)\s(\w+)/g, '$2 $1'); // Simple example: switches the first two words
+    return text.replace(/(\w+)\s(\w+)/g, '$2 $1'); // Example of switching the first two words
 };
 
 // Add Personal Touches
@@ -60,30 +58,7 @@ const addPersonalTouches = (text) => {
     return `${randomPhrase} ${text}`;
 };
 
-// Randomized Variations
-const commonVariations = [
-    "This might resonate with you.",
-    "You might find this interesting.",
-    "Here's something to ponder."
-];
-
-// Change Tone and Style
-const adjustTone = (text) => {
-    if (text.includes('urgent')) {
-        return text.replace('urgent', 'really important');
-    }
-    return text;
-};
-
-// Contextual Understanding
-const contextualModification = (text) => {
-    if (text.includes('disappointed')) {
-        return text.replace('disappointed', 'a bit let down');
-    }
-    return text;
-};
-
-// Function to handle the OpenAI API request with retries
+// Function to handle OpenAI API request with retries
 const fetchHumanizedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -91,32 +66,26 @@ const fetchHumanizedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
-    const maxTokens = estimateTokens(inputText); // Estimate max tokens dynamically based on input text
+    const maxTokens = estimateTokens(inputText); 
 
     // Apply strategies
     let modifiedText = replaceSynonyms(inputText);
     modifiedText = restructureSentence(modifiedText);
     modifiedText = addPersonalTouches(modifiedText);
-    modifiedText = adjustTone(modifiedText);
-    modifiedText = contextualModification(modifiedText);
-
-    // Append a random variation
-    const randomVariation = commonVariations[Math.floor(Math.random() * commonVariations.length)];
-    modifiedText += ` ${randomVariation}`;
 
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             { 
                 role: 'user', 
-                content: `Rewrite the following text in a human-like manner, ensuring it is plagiarism-free and undetectable by AI detectors, while minimizing AI-like content:\n\n${modifiedText}` 
+                content: `Rewrite the following text in a human-like manner, ensuring it is plagiarism-free and minimizing any AI-like traits:\n\n${modifiedText}` 
             }
         ],
-        max_tokens: maxTokens, // Dynamically set max_tokens based on input size
-        temperature: 0.55,      // Further reduced to limit randomness
-        top_p: 0.85,            // Adjusted for a tighter probability spread
-        frequency_penalty: 1.2, // Increased to penalize repetitive phrases more aggressively
-        presence_penalty: 0.7   // Encourage more diversity in the output
+        max_tokens: maxTokens, 
+        temperature: 0.2,      // Lower temperature for more deterministic output
+        top_p: 0.9,            // Slightly increased for more variety
+        frequency_penalty: 1.5, // Increase penalty to discourage repetitive phrases
+        presence_penalty: 1.5   // Encourage diversity in output
     };
 
     try {
@@ -140,7 +109,7 @@ app.post('/humanize', async (req, res) => {
         const transformedText = await fetchHumanizedText(inputText);
         res.json({ transformedText });
     } catch (error) {
-        console.error('Error:', error);  // Log the error more explicitly
+        console.error('Error:', error);
         res.status(500).json({ error: 'Failed to humanize text' });
     }
 });
