@@ -15,27 +15,37 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     document.getElementById('humanizedText').innerText = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
 
-    // Send the input text to the backend for humanization
-    const response = await fetch('http://localhost:3000/humanize', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ inputText })
-    });
+    try {
+        // Send the input text to the backend for humanization
+        const response = await fetch('http://localhost:3000/humanize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ inputText })
+        });
 
-    const data = await response.json();
+        if (!response.ok) {
+            throw new Error('Failed to humanize text');
+        }
 
-    // Hide loader
-    document.getElementById('loader').style.display = 'none';
+        const data = await response.json();
 
-    // Display the transformed text
-    document.getElementById('humanizedText').innerText = data.transformedText;
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
 
-    // Calculate and display output word count
-    const outputWordCount = data.transformedText.trim().split(/\s+/).length;
-    document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
-    document.getElementById('retryBtn').style.display = 'inline';
+        // Display the transformed text
+        document.getElementById('humanizedText').innerText = data.transformedText;
+
+        // Calculate and display output word count
+        const outputWordCount = data.transformedText.trim().split(/\s+/).length;
+        document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+        document.getElementById('retryBtn').style.display = 'inline';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error: Could not humanize the text. Please try again later.');
+        document.getElementById('loader').style.display = 'none';
+    }
 });
 
 document.getElementById('retryBtn').addEventListener('click', async function () {
@@ -46,25 +56,35 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
     document.getElementById('humanizedText').innerText = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
 
-    const response = await fetch('http://localhost:3000/humanize', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ inputText })
-    });
+    try {
+        const response = await fetch('http://localhost:3000/humanize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ inputText })
+        });
 
-    const data = await response.json();
+        if (!response.ok) {
+            throw new Error('Failed to humanize text');
+        }
 
-    // Hide loader
-    document.getElementById('loader').style.display = 'none';
+        const data = await response.json();
 
-    // Display the transformed text
-    document.getElementById('humanizedText').innerText = data.transformedText;
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
 
-    // Calculate and display output word count
-    const outputWordCount = data.transformedText.trim().split(/\s+/).length;
-    document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+        // Display the transformed text
+        document.getElementById('humanizedText').innerText = data.transformedText;
+
+        // Calculate and display output word count
+        const outputWordCount = data.transformedText.trim().split(/\s+/).length;
+        document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error: Could not humanize the text. Please try again later.');
+        document.getElementById('loader').style.display = 'none';
+    }
 });
 
 // Clear button functionality
