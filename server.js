@@ -113,10 +113,10 @@ const fetchHumanizedText = async (inputText) => {
             }
         ],
         max_tokens: maxTokens, // Dynamically set max_tokens based on input size
-        temperature: 0.2,      // Further reduced to limit randomness
-        top_p: 0.9,            // Adjusted for a tighter probability spread
-        frequency_penalty: 1.5, // Increased to penalize repetitive phrases more aggressively
-        presence_penalty: 1.5   // Encourage more diversity in the output
+        temperature: 0.55,      // Further reduced to limit randomness
+        top_p: 0.85,            // Adjusted for a tighter probability spread
+        frequency_penalty: 1.2, // Increased to penalize repetitive phrases more aggressively
+        presence_penalty: 0.7   // Encourage more diversity in the output
     };
 
     try {
