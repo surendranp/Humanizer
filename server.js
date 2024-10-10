@@ -115,7 +115,7 @@ const fetchHumanizedText = async (inputText) => {
         max_tokens: maxTokens, // Dynamically set max_tokens based on input size
         temperature: 0.65,      // Lowered temperature to reduce randomness
         top_p: 0.9,             // Slightly reduced to favor higher probability choices
-        frequency_penalty: 0.7, // Adjusted to penalize repetitive phrases more
+        frequency_penalty: 0.9, // Adjusted to penalize repetitive phrases more
         presence_penalty: 0.5   // Encourage new topics as before
     };
 
