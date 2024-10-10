@@ -5,27 +5,27 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Use the port from environment variables for hosting
 
 // Middleware setup
 app.use(cors());
 app.use(bodyParser.json());
 
 // Serve the static files (like index.html, CSS, and JS)
-app.use(express.static('public')); // Add this to serve static files
+app.use(express.static('public')); // Serve static files from the 'public' directory
 
 // OpenAI API Key
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // Function to estimate the number of tokens based on the input text length
-function estimateTokens(inputText) {
+const estimateTokens = (inputText) => {
     const wordCount = inputText.split(/\s+/).length;
     // Approximate number of tokens is roughly 1.33x the word count
-    return Math.min(Math.ceil(wordCount * 1.33), 2048);  // Ensure it doesn't exceed OpenAI's max token limit
-}
+    return Math.min(Math.ceil(wordCount * 1.33), 2048); // Ensure it doesn't exceed OpenAI's max token limit
+};
 
 // Function to handle the OpenAI API request with retries
-async function fetchHumanizedText(inputText) {
+const fetchHumanizedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -37,11 +37,14 @@ async function fetchHumanizedText(inputText) {
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
-            { role: 'user', content: `Rewrite the following text in a human-like manner, maintaining the full length but ensuring it is plagiarism-free and undetectable by AI detectors:\n\n${inputText}` }
+            { 
+                role: 'user', 
+                content: `Rewrite the following text in a human-like manner, maintaining the full length but ensuring it is plagiarism-free and undetectable by AI detectors:\n\n${inputText}` 
+            }
         ],
-        max_tokens: maxTokens,  // Dynamically set max_tokens based on input size
-        temperature: 0.7,       // Adjust creativity/risk of the text
-        top_p: 0.95,            // Ensure diversity in the output
+        max_tokens: maxTokens, // Dynamically set max_tokens based on input size
+        temperature: 0.7,      // Adjust creativity/risk of the text
+        top_p: 0.95,           // Ensure diversity in the output
         frequency_penalty: 0.5, // Penalize repetitive phrases
         presence_penalty: 0.5   // Encourage new topics
     };
@@ -53,7 +56,7 @@ async function fetchHumanizedText(inputText) {
         console.error('Error details:', error.response ? error.response.data : error.message);
         throw new Error('Failed to fetch humanized text from OpenAI API');
     }
-}
+};
 
 // API route to handle text transformation
 app.post('/humanize', async (req, res) => {
@@ -68,7 +71,7 @@ app.post('/humanize', async (req, res) => {
     }
 });
 
-// Serve the index.html at root route
+// Serve the index.html at the root route
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
