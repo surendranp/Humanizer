@@ -42,22 +42,25 @@ const replaceSynonyms = (text) => {
 
 // Sentence Restructuring
 const restructureSentence = (text) => {
-    // Example: Use more advanced algorithms to restructure sentences
-    return text.replace(/(\w+)\s(\w+)/g, '$2 $1');
+    // Example: Reorder sentences naturally by focusing on rephrasing common sentence structures.
+    return text
+        .replace(/This gym offers/g, "At this gym, you'll find")
+        .replace(/At the end of the day,/g, "In the end,")
+        .replace(/Furthermore,/g, "Also,");
 };
 
 // Add Personal Touches
 const addPersonalTouches = (text) => {
     const personalPhrases = [
-        "You know, it's like when you think about it...",
-        "Isn't it amazing how...",
-        "By the way, have you ever noticed..."
+        "I mean, it's pretty clear that...",
+        "You know what? I've noticed that...",
+        "Honestly, have you ever thought about how..."
     ];
     const randomPhrase = personalPhrases[Math.floor(Math.random() * personalPhrases.length)];
     return `${randomPhrase} ${text}`;
 };
 
-// Apply stronger pre-processing to minimize AI involvement
+// Stronger pre-processing to humanize locally
 const humanizeTextLocally = (inputText) => {
     let modifiedText = replaceSynonyms(inputText);
     modifiedText = restructureSentence(modifiedText);
@@ -65,7 +68,7 @@ const humanizeTextLocally = (inputText) => {
     return modifiedText;
 };
 
-// Function to validate and lightly adjust text via OpenAI API
+// Function to validate and refine text via OpenAI API
 const fetchValidatedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -73,22 +76,21 @@ const fetchValidatedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
-    const maxTokens = estimateTokens(inputText); 
+    const maxTokens = estimateTokens(inputText);
 
-    // Request OpenAI to lightly refine the already humanized text
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             {
                 role: 'user',
-                content: `Lightly refine this text to sound more natural but minimize AI rephrasing. Only polish without generating new ideas:\n\n${inputText}`
+                content: `Lightly refine this text to sound more natural without adding AI-like patterns. Focus on polishing, not rephrasing entirely:\n\n${inputText}`
             }
         ],
-        max_tokens: maxTokens, 
-        temperature: 0.1,      // Very low randomness
-        top_p: 0.9,            // Slight variation, but highly constrained
-        frequency_penalty: 1.5, // Avoid repetitive phrases
-        presence_penalty: 1.2   // Encourage some diversity, but stay within constraints
+        max_tokens: maxTokens,
+        temperature: 0.1,
+        top_p: 0.9,
+        frequency_penalty: 1.5,
+        presence_penalty: 1.2
     };
 
     try {
@@ -112,7 +114,7 @@ app.post('/humanize', async (req, res) => {
         // First, apply strong local humanization
         let humanizedText = humanizeTextLocally(inputText);
 
-        // Then, send the text to OpenAI for minimal adjustments only
+        // Then, send the text to OpenAI for minimal adjustments
         const finalText = await fetchValidatedText(humanizedText);
         res.json({ transformedText: finalText });
     } catch (error) {

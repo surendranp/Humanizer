@@ -1,4 +1,4 @@
-const baseUrl = window.location.origin; // Automatically detect the base URL (localhost in dev, Railway domain in production)
+const baseUrl = window.location.origin;
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
@@ -8,14 +8,12 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         return;
     }
 
-    // Show loader
     document.getElementById('loader').style.display = 'block';
-    document.getElementById('humanizedText').innerText = ''; // Clear previous output
-    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
+    document.getElementById('humanizedText').innerText = '';
+    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
 
     try {
-        // Send the input text to the backend for humanization
-        const response = await fetch(`${baseUrl}/humanize`, { // Use dynamic URL here
+        const response = await fetch(`${baseUrl}/humanize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -29,13 +27,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
         const data = await response.json();
 
-        // Hide loader
         document.getElementById('loader').style.display = 'none';
-
-        // Display the transformed text
         document.getElementById('humanizedText').innerText = data.transformedText;
-
-        // Calculate and display output word count
         const outputWordCount = data.transformedText.trim().split(/\s+/).length;
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
         document.getElementById('retryBtn').style.display = 'inline';
@@ -50,13 +43,12 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 document.getElementById('retryBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
 
-    // Show loader
     document.getElementById('loader').style.display = 'block';
-    document.getElementById('humanizedText').innerText = ''; // Clear previous output
-    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
+    document.getElementById('humanizedText').innerText = '';
+    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
 
     try {
-        const response = await fetch(`${baseUrl}/humanize`, { // Use dynamic URL here
+        const response = await fetch(`${baseUrl}/humanize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -70,13 +62,8 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
 
         const data = await response.json();
 
-        // Hide loader
         document.getElementById('loader').style.display = 'none';
-
-        // Display the transformed text
         document.getElementById('humanizedText').innerText = data.transformedText;
-
-        // Calculate and display output word count
         const outputWordCount = data.transformedText.trim().split(/\s+/).length;
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
 
@@ -87,16 +74,14 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
     }
 });
 
-// Clear button functionality
 document.getElementById('clearBtn').addEventListener('click', function () {
-    document.getElementById('inputText').value = '';  // Clear the text area
-    document.getElementById('humanizedText').innerText = 'Your transformed text will appear here...'; // Reset transformed text
-    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
-    document.getElementById('wordCount').innerText = 'Word Count: 0';  // Reset input word count
-    document.getElementById('retryBtn').style.display = 'none';  // Hide the retry button
+    document.getElementById('inputText').value = '';
+    document.getElementById('humanizedText').innerText = 'Your transformed text will appear here...';
+    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
+    document.getElementById('wordCount').innerText = 'Word Count: 0';
+    document.getElementById('retryBtn').style.display = 'none';
 });
 
-// Function to update the word count dynamically
 document.getElementById('inputText').addEventListener('input', function () {
     const inputText = this.value;
     const inputWordCount = inputText.trim() === '' ? 0 : inputText.trim().split(/\s+/).length;
