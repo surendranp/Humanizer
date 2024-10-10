@@ -28,16 +28,24 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// Synonym Replacement
+// More advanced synonym replacement to reduce AI-like wording
 const synonyms = {
-    "happy": "joyful",
-    "sad": "unhappy",
-    "difficult": "challenging",
+    "happy": ["joyful", "pleased", "delighted"],
+    "sad": ["unhappy", "downhearted", "sorrowful"],
+    "difficult": ["challenging", "tough", "complex"],
+    "important": ["vital", "crucial", "significant"],
     // Add more synonyms as needed
 };
 
 const replaceSynonyms = (text) => {
-    return text.split(' ').map(word => synonyms[word.toLowerCase()] || word).join(' ');
+    return text.split(' ').map(word => {
+        const lowerWord = word.toLowerCase();
+        if (synonyms[lowerWord]) {
+            const replacementList = synonyms[lowerWord];
+            return replacementList[Math.floor(Math.random() * replacementList.length)];
+        }
+        return word;
+    }).join(' ');
 };
 
 // Detecting AI-like patterns and neutralizing them
@@ -62,33 +70,36 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
     return neutralizedText;
 };
 
-// Sentence Restructuring
+// Sentence restructuring that mimics natural human variation
 const restructureSentence = (text) => {
-    return text
-        .replace(/This study shows/g, "What we find is that")
-        .replace(/is essential/g, "is really important")
-        .replace(/Furthermore,/g, "Also,")
-        .replace(/It is recommended/g, "I would suggest")
-        .replace(/In conclusion,/g, "To sum it up,");
+    let sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);  // Split text into sentences
+    return sentences.map(sentence => {
+        return sentence
+            .replace(/This study shows/g, "What we see here is that")
+            .replace(/is essential/g, "is quite important")
+            .replace(/Furthermore,/g, "Also,")
+            .replace(/It is recommended/g, "I'd recommend")
+            .replace(/In conclusion,/g, "All things considered,");
+    }).join(' ');
 };
 
-// Add Personal Touches
+// Add Human-Like Variations
 const addPersonalTouches = (text) => {
     const personalPhrases = [
-        "I mean, it's pretty clear that...",
-        "You know what? I've noticed that...",
-        "Honestly, have you ever thought about how..."
+        "To be honest, it seems like...",
+        "You know what? I'd say that...",
+        "Honestly, have you ever wondered..."
     ];
     const randomPhrase = personalPhrases[Math.floor(Math.random() * personalPhrases.length)];
     return `${randomPhrase} ${text}`;
 };
 
-// Stronger local humanization function
+// Advanced text humanization function
 const humanizeTextLocally = (inputText) => {
-    let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Step 1: Detect and neutralize AI patterns
+    let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Step 1: Neutralize AI patterns
     neutralizedText = replaceSynonyms(neutralizedText);  // Step 2: Replace common AI words with human synonyms
-    neutralizedText = restructureSentence(neutralizedText);  // Step 3: Restructure sentences for a conversational flow
-    neutralizedText = addPersonalTouches(neutralizedText);  // Step 4: Add personal phrases for informality
+    neutralizedText = restructureSentence(neutralizedText);  // Step 3: Restructure sentences
+    neutralizedText = addPersonalTouches(neutralizedText);  // Step 4: Add informal tone
     return neutralizedText;
 };
 
@@ -107,14 +118,14 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Please lightly refine this text to sound more natural without adding AI-like patterns. Focus on polishing, not rephrasing entirely:\n\n${inputText}`
+                content: `Refine this text to sound natural and undetectable by AI detection tools. Ensure it flows like human writing without triggering AI flags:\n\n${inputText}`
             }
         ],
         max_tokens: maxTokens,
-        temperature: 0.1,  // Minimize randomness to avoid AI-like style
+        temperature: 0.1,
         top_p: 0.9,
-        frequency_penalty: 1.5,  // Encourage variety in sentence structure
-        presence_penalty: 1.2  // Reduce AI presence in the output
+        frequency_penalty: 1.5,
+        presence_penalty: 1.2
     };
 
     try {
@@ -135,10 +146,10 @@ app.post('/humanize', async (req, res) => {
     }
 
     try {
-        // First, apply strong local humanization
+        // Step 1: Apply local humanization
         let humanizedText = humanizeTextLocally(inputText);
 
-        // Then, send the text to OpenAI for minimal adjustments
+        // Step 2: Send the text to OpenAI for minimal adjustments
         const finalText = await fetchValidatedText(humanizedText);
         res.json({ transformedText: finalText });
     } catch (error) {

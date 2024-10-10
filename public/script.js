@@ -84,6 +84,6 @@ document.getElementById('clearBtn').addEventListener('click', function () {
 
 document.getElementById('inputText').addEventListener('input', function () {
     const inputText = this.value;
-    const wordCount = inputText.trim().split(/\s+/).length;
+    const wordCount = inputText.trim() === '' ? 0 : inputText.trim().split(/\s+/).length;
     document.getElementById('wordCount').innerText = `Word Count: ${wordCount}`;
 });
