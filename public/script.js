@@ -8,10 +8,6 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         return;
     }
 
-    // Calculate input word count
-    const inputWordCount = inputText.trim().split(/\s+/).length;
-    document.getElementById('wordCount').innerText = `Word Count: ${inputWordCount}`;
-
     // Show loader
     document.getElementById('loader').style.display = 'block';
     document.getElementById('humanizedText').innerText = ''; // Clear previous output
@@ -98,4 +94,11 @@ document.getElementById('clearBtn').addEventListener('click', function () {
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
     document.getElementById('wordCount').innerText = 'Word Count: 0';  // Reset input word count
     document.getElementById('retryBtn').style.display = 'none';  // Hide the retry button
+});
+
+// Function to update the word count dynamically
+document.getElementById('inputText').addEventListener('input', function () {
+    const inputText = this.value;
+    const inputWordCount = inputText.trim() === '' ? 0 : inputText.trim().split(/\s+/).length;
+    document.getElementById('wordCount').innerText = `Word Count: ${inputWordCount}`;
 });
