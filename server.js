@@ -28,18 +28,20 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// More advanced synonym replacement to reduce AI-like wording
+// Synonym replacement dictionary
 const synonyms = {
-    "happy": ["joyful", "pleased", "delighted"],
-    "sad": ["unhappy", "downhearted", "sorrowful"],
-    "difficult": ["challenging", "tough", "complex"],
-    "important": ["vital", "crucial", "significant"],
+    "happy": ["joyful", "pleased", "content", "delighted"],
+    "sad": ["unhappy", "downhearted", "sorrowful", "dejected"],
+    "difficult": ["challenging", "tough", "hard"],
+    "important": ["crucial", "vital", "significant", "essential"],
     // Add more synonyms as needed
 };
 
-const replaceSynonyms = (text) => {
-    return text.split(' ').map(word => {
+// Context-aware synonym replacement
+const replaceSynonymsContextually = (text) => {
+    return text.split(' ').map((word) => {
         const lowerWord = word.toLowerCase();
+        // Use a more advanced context check here if needed
         if (synonyms[lowerWord]) {
             const replacementList = synonyms[lowerWord];
             return replacementList[Math.floor(Math.random() * replacementList.length)];
@@ -48,7 +50,7 @@ const replaceSynonyms = (text) => {
     }).join(' ');
 };
 
-// Detecting AI-like patterns and neutralizing them
+// AI pattern detection and neutralization
 const detectAndNeutralizeAIPatterns = (inputText) => {
     const aiPatterns = [
         /Furthermore,/g,
@@ -57,9 +59,9 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
         /Secondly,/g,
         /Overall,/g,
         /Therefore,/g,
-        /highly advanced/g,
-        /In addition to this,/g,
-        /research-based/g
+        /research-based/g,
+        /It is recommended that/g,
+        // Add more patterns as needed
     ];
 
     let neutralizedText = inputText;
@@ -70,25 +72,29 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
     return neutralizedText;
 };
 
-// Sentence restructuring that mimics natural human variation
+// Sentence restructuring
 const restructureSentence = (text) => {
-    let sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);  // Split text into sentences
+    let sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
     return sentences.map(sentence => {
-        return sentence
-            .replace(/This study shows/g, "What we see here is that")
-            .replace(/is essential/g, "is quite important")
-            .replace(/Furthermore,/g, "Also,")
-            .replace(/It is recommended/g, "I'd recommend")
-            .replace(/In conclusion,/g, "All things considered,");
+        // Use varied sentence starters and structures
+        const startWords = [
+            "Interestingly,",
+            "What stands out is that",
+            "You might notice that",
+            "It's worth mentioning that"
+        ];
+        const randomStart = startWords[Math.floor(Math.random() * startWords.length)];
+        return `${randomStart} ${sentence}`;
     }).join(' ');
 };
 
-// Add Human-Like Variations
+// Add human-like variations and informal touches
 const addPersonalTouches = (text) => {
     const personalPhrases = [
-        "To be honest, it seems like...",
-        "You know what? I'd say that...",
-        "Honestly, have you ever wondered..."
+        "Honestly, it seems like...",
+        "To be honest, I'd say...",
+        "Have you ever thought about...",
+        "Let me tell you, it's quite interesting..."
     ];
     const randomPhrase = personalPhrases[Math.floor(Math.random() * personalPhrases.length)];
     return `${randomPhrase} ${text}`;
@@ -96,10 +102,10 @@ const addPersonalTouches = (text) => {
 
 // Advanced text humanization function
 const humanizeTextLocally = (inputText) => {
-    let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Step 1: Neutralize AI patterns
-    neutralizedText = replaceSynonyms(neutralizedText);  // Step 2: Replace common AI words with human synonyms
-    neutralizedText = restructureSentence(neutralizedText);  // Step 3: Restructure sentences
-    neutralizedText = addPersonalTouches(neutralizedText);  // Step 4: Add informal tone
+    let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Neutralize AI patterns
+    neutralizedText = replaceSynonymsContextually(neutralizedText);  // Contextual synonym replacement
+    neutralizedText = restructureSentence(neutralizedText);  // Restructure sentences
+    neutralizedText = addPersonalTouches(neutralizedText);  // Add informal tone
     return neutralizedText;
 };
 
@@ -118,7 +124,7 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound natural and undetectable by AI detection tools. Ensure it flows like human writing without triggering AI flags:\n\n${inputText}`
+                content: `Please refine this text to sound more natural and human-like, making it undetectable by AI detection tools:\n\n${inputText}`
             }
         ],
         max_tokens: maxTokens,
@@ -149,7 +155,7 @@ app.post('/humanize', async (req, res) => {
         // Step 1: Apply local humanization
         let humanizedText = humanizeTextLocally(inputText);
 
-        // Step 2: Send the text to OpenAI for minimal adjustments
+        // Step 2: Send the text to OpenAI for further adjustments
         const finalText = await fetchValidatedText(humanizedText);
         res.json({ transformedText: finalText });
     } catch (error) {
