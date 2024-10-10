@@ -40,13 +40,36 @@ const replaceSynonyms = (text) => {
     return text.split(' ').map(word => synonyms[word.toLowerCase()] || word).join(' ');
 };
 
+// Detecting AI-like patterns and neutralizing them
+const detectAndNeutralizeAIPatterns = (inputText) => {
+    const aiPatterns = [
+        /Furthermore,/g,
+        /In conclusion,/g,
+        /Firstly,/g,
+        /Secondly,/g,
+        /Overall,/g,
+        /Therefore,/g,
+        /highly advanced/g,
+        /In addition to this,/g,
+        /research-based/g
+    ];
+
+    let neutralizedText = inputText;
+    aiPatterns.forEach((pattern) => {
+        neutralizedText = neutralizedText.replace(pattern, '');
+    });
+
+    return neutralizedText;
+};
+
 // Sentence Restructuring
 const restructureSentence = (text) => {
-    // Example: Reorder sentences naturally by focusing on rephrasing common sentence structures.
     return text
-        .replace(/This gym offers/g, "At this gym, you'll find")
-        .replace(/At the end of the day,/g, "In the end,")
-        .replace(/Furthermore,/g, "Also,");
+        .replace(/This study shows/g, "What we find is that")
+        .replace(/is essential/g, "is really important")
+        .replace(/Furthermore,/g, "Also,")
+        .replace(/It is recommended/g, "I would suggest")
+        .replace(/In conclusion,/g, "To sum it up,");
 };
 
 // Add Personal Touches
@@ -60,12 +83,13 @@ const addPersonalTouches = (text) => {
     return `${randomPhrase} ${text}`;
 };
 
-// Stronger pre-processing to humanize locally
+// Stronger local humanization function
 const humanizeTextLocally = (inputText) => {
-    let modifiedText = replaceSynonyms(inputText);
-    modifiedText = restructureSentence(modifiedText);
-    modifiedText = addPersonalTouches(modifiedText);
-    return modifiedText;
+    let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Step 1: Detect and neutralize AI patterns
+    neutralizedText = replaceSynonyms(neutralizedText);  // Step 2: Replace common AI words with human synonyms
+    neutralizedText = restructureSentence(neutralizedText);  // Step 3: Restructure sentences for a conversational flow
+    neutralizedText = addPersonalTouches(neutralizedText);  // Step 4: Add personal phrases for informality
+    return neutralizedText;
 };
 
 // Function to validate and refine text via OpenAI API
@@ -83,14 +107,14 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Lightly refine this text to sound more natural without adding AI-like patterns. Focus on polishing, not rephrasing entirely:\n\n${inputText}`
+                content: `Please lightly refine this text to sound more natural without adding AI-like patterns. Focus on polishing, not rephrasing entirely:\n\n${inputText}`
             }
         ],
         max_tokens: maxTokens,
-        temperature: 0.1,
+        temperature: 0.1,  // Minimize randomness to avoid AI-like style
         top_p: 0.9,
-        frequency_penalty: 1.5,
-        presence_penalty: 1.2
+        frequency_penalty: 1.5,  // Encourage variety in sentence structure
+        presence_penalty: 1.2  // Reduce AI presence in the output
     };
 
     try {
