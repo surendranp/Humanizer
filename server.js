@@ -26,7 +26,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const estimateTokens = (inputText) => {
     const wordCount = inputText.split(/\s+/).length;
     // Approximate number of tokens is roughly 1.33x the word count
-    return Math.min(Math.ceil(wordCount * 1.33), 2048); // Ensure it doesn't exceed OpenAI's max token limit
+    return Math.min(Math.ceil(wordCount * 1.33), 1024); // Limit to 1024 tokens
 };
 
 // Synonym Replacement
@@ -44,12 +44,12 @@ const replaceSynonyms = (text) => {
     }).join(' ');
 };
 
-// Sentence Restructuring
+// Sentence Restructuring (Minimal rephrasing to ensure mostly human content)
 const restructureSentence = (text) => {
     return text.replace(/(\w+)\s(\w+)/g, '$2 $1'); // Simple example: switches the first two words
 };
 
-// Add Personal Touches
+// Add Personal Touches (Manual touch that doesn't involve AI)
 const addPersonalTouches = (text) => {
     const personalPhrases = [
         "You know, it's like when you think about it...",
@@ -67,7 +67,7 @@ const commonVariations = [
     "Here's something to ponder."
 ];
 
-// Change Tone and Style
+// Change Tone and Style (Manual adjustments to reduce AI's influence)
 const adjustTone = (text) => {
     if (text.includes('urgent')) {
         return text.replace('urgent', 'really important');
@@ -75,7 +75,7 @@ const adjustTone = (text) => {
     return text;
 };
 
-// Contextual Understanding
+// Contextual Understanding (Apply non-AI based context fixes)
 const contextualModification = (text) => {
     if (text.includes('disappointed')) {
         return text.replace('disappointed', 'a bit let down');
@@ -83,7 +83,22 @@ const contextualModification = (text) => {
     return text;
 };
 
-// Function to handle the OpenAI API request with retries
+// Preprocess the input to make it more human-like before sending to AI
+const preprocessText = (inputText) => {
+    let modifiedText = replaceSynonyms(inputText);
+    modifiedText = restructureSentence(modifiedText);
+    modifiedText = addPersonalTouches(modifiedText);
+    modifiedText = adjustTone(modifiedText);
+    modifiedText = contextualModification(modifiedText);
+
+    // Append a random variation (manual)
+    const randomVariation = commonVariations[Math.floor(Math.random() * commonVariations.length)];
+    modifiedText += ` ${randomVariation}`;
+
+    return modifiedText;
+};
+
+// Function to handle minimal OpenAI API usage
 const fetchHumanizedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -91,32 +106,21 @@ const fetchHumanizedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
-    const maxTokens = estimateTokens(inputText); // Estimate max tokens dynamically based on input text
-
-    // Apply strategies
-    let modifiedText = replaceSynonyms(inputText);
-    modifiedText = restructureSentence(modifiedText);
-    modifiedText = addPersonalTouches(modifiedText);
-    modifiedText = adjustTone(modifiedText);
-    modifiedText = contextualModification(modifiedText);
-
-    // Append a random variation
-    const randomVariation = commonVariations[Math.floor(Math.random() * commonVariations.length)];
-    modifiedText += ` ${randomVariation}`;
+    const maxTokens = Math.floor(estimateTokens(inputText) * 0.05); // Use only 5% of token limit
 
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             { 
                 role: 'user', 
-                content: `Rewrite the following text in a human-like manner, maintaining the full length but ensuring it is plagiarism-free and undetectable by AI detectors:\n\n${modifiedText}` 
+                content: `Slightly refine this text for better readability, ensuring minimal change:\n\n${inputText}` 
             }
         ],
-        max_tokens: maxTokens, // Dynamically set max_tokens based on input size
-        temperature: 0.65,      // Lowered temperature to reduce randomness
-        top_p: 0.9,             // Slightly reduced to favor higher probability choices
-        frequency_penalty: 0.9, // Adjusted to penalize repetitive phrases more
-        presence_penalty: 0.5   // Encourage new topics as before
+        max_tokens: maxTokens,  // Limit tokens to only make minor adjustments (5% AI)
+        temperature: 0.5,       // Neutral temperature, less creativity
+        top_p: 0.9,             // Favor most likely choices, but still some diversity
+        frequency_penalty: 0.8, // Strong penalty to prevent AI-like repetitiveness
+        presence_penalty: 0.6   // Mild presence penalty to encourage variety but minimize change
     };
 
     try {
@@ -137,8 +141,12 @@ app.post('/humanize', async (req, res) => {
     }
 
     try {
-        const transformedText = await fetchHumanizedText(inputText);
-        res.json({ transformedText });
+        // Preprocess the text manually to minimize AI usage
+        const preprocessedText = preprocessText(inputText);
+
+        // Use the OpenAI API to do minor adjustments (5% AI content)
+        const finalText = await fetchHumanizedText(preprocessedText);
+        res.json({ transformedText: finalText });
     } catch (error) {
         console.error('Error:', error);  // Log the error more explicitly
         res.status(500).json({ error: 'Failed to humanize text' });
