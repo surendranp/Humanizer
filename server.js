@@ -122,10 +122,10 @@ const fetchValidatedText = async (inputText) => {
             }
         ],
         max_tokens: maxTokens,
-        temperature: 0.85,
-        top_p: 0.95,
-        frequency_penalty: 1.5,
-        presence_penalty: 1.2
+        temperature: 0.7,
+        top_p: 1.0,
+        frequency_penalty: 0,
+        presence_penalty: 0
     };
 
     try {
