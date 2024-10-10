@@ -29,24 +29,58 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048); // Ensure it doesn't exceed OpenAI's max token limit
 };
 
-// Synonym Replacement
+// Improved Synonym Replacement
 const synonyms = {
-    "happy": "joyful",
-    "sad": "unhappy",
-    "difficult": "challenging",
+    "happy": ["joyful", "cheerful", "elated"],
+    "sad": ["unhappy", "sorrowful", "downcast"],
+    "difficult": ["challenging", "tough", "arduous"],
+    "good": ["great", "excellent", "favorable"],
+    "bad": ["poor", "subpar", "detrimental"],
     // Add more synonyms as needed
 };
 
 // Function for synonym replacement
 const replaceSynonyms = (text) => {
     return text.split(' ').map(word => {
-        return synonyms[word.toLowerCase()] || word;
+        const lowerCaseWord = word.toLowerCase().replace(/[.,!?]/g, ''); // Remove punctuation for matching
+        const replacements = synonyms[lowerCaseWord];
+        if (replacements) {
+            // Randomly select a synonym from the list
+            return replacements[Math.floor(Math.random() * replacements.length)];
+        }
+        return word; // Return the original word if no synonym found
     }).join(' ');
 };
 
-// Sentence Restructuring
+// Improved Sentence Restructuring
 const restructureSentence = (text) => {
-    return text.replace(/(\w+)\s(\w+)/g, '$2 $1'); // Simple example: switches the first two words
+    // Split sentences by punctuation
+    let sentences = text.split(/(?<=[.!?])\s+/);
+    
+    // Restructure each sentence
+    return sentences.map(sentence => {
+        let words = sentence.split(' ');
+        
+        // Example strategies:
+        // 1. Reverse the order of the first two words if sentence is longer than 3 words
+        if (words.length > 3) {
+            [words[0], words[1]] = [words[1], words[0]];
+        }
+
+        // 2. Add a transition phrase if it fits
+        const transitionPhrases = ["Interestingly,", "Surprisingly,", "In fact,"];
+        if (Math.random() > 0.5) { // 50% chance to add a transition phrase
+            const randomPhrase = transitionPhrases[Math.floor(Math.random() * transitionPhrases.length)];
+            words.unshift(randomPhrase);
+        }
+
+        // 3. Shuffle words for some sentences
+        if (Math.random() > 0.5) {
+            words = words.sort(() => Math.random() - 0.5); // Shuffle words randomly
+        }
+
+        return words.join(' ');
+    }).join(' '); // Join restructured sentences back into a paragraph
 };
 
 // Add Personal Touches
