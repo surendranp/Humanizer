@@ -1,5 +1,5 @@
 {
-  "name": "humbot-text-humanizer",
+  "name": "ai-humanizer",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {

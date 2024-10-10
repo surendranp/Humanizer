@@ -1,3 +1,5 @@
+const baseUrl = window.location.origin; // Automatically detect the base URL (localhost in dev, Railway domain in production)
+
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
 
@@ -17,7 +19,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
     try {
         // Send the input text to the backend for humanization
-        const response = await fetch('http://localhost:3000/humanize', {
+        const response = await fetch(`${baseUrl}/humanize`, { // Use dynamic URL here
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -41,9 +43,10 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         const outputWordCount = data.transformedText.trim().split(/\s+/).length;
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
         document.getElementById('retryBtn').style.display = 'inline';
+
     } catch (error) {
         console.error('Error:', error);
-        alert('Error: Could not humanize the text. Please try again later.');
+        alert('Error occurred while humanizing the text. Please try again.');
         document.getElementById('loader').style.display = 'none';
     }
 });
@@ -57,7 +60,7 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0'; // Reset output word count
 
     try {
-        const response = await fetch('http://localhost:3000/humanize', {
+        const response = await fetch(`${baseUrl}/humanize`, { // Use dynamic URL here
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,9 +83,10 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
         // Calculate and display output word count
         const outputWordCount = data.transformedText.trim().split(/\s+/).length;
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+
     } catch (error) {
         console.error('Error:', error);
-        alert('Error: Could not humanize the text. Please try again later.');
+        alert('Error occurred while humanizing the text. Please try again.');
         document.getElementById('loader').style.display = 'none';
     }
 });
