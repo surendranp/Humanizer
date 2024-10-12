@@ -10,8 +10,8 @@
 <body>
     <div class="container"> 
         <h1 class="text-center mb-4">AI Text Humanizer</h1>
-        <div class="row " >
-            <div class="col-md-6 mb-3 ">
+        <div class="row">
+            <div class="col-md-6 mb-3">
                 <p>Input Text:</p>
                 <textarea id="inputText" class="form-control" rows="10" placeholder="Enter AI-generated text here..."></textarea>
                 <p id="wordCount" class="mt-2">Word Count: 0</p>
@@ -28,9 +28,17 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="script.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Add this event listener to count words
+        document.getElementById('inputText').addEventListener('input', function () {
+            const text = this.value.trim();
+            const wordCount = text ? text.split(/\s+/).length : 0;
+            document.getElementById('wordCount').innerText = `Word Count: ${wordCount}`;
+        });
+    </script>
 </body>
 </html>
