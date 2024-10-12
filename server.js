@@ -78,7 +78,7 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
     return neutralizedText;
 };
 
-// Sentence restructuring (improving sentence flow)
+// Sentence restructuring (improving sentence flow) 
 const restructureSentence = (text) => {
     let sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
     return sentences.map(sentence => {
