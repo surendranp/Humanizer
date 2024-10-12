@@ -27,21 +27,25 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// Synonym replacement using WordNet and a diverse dictionary
+// Synonym replacement with deeper synonym variation using WordNet
 const replaceSynonymsWithWordNet = async (text) => {
     const words = text.split(' ');
     for (let i = 0; i < words.length; i++) {
         const lowerWord = words[i].toLowerCase();
         await wordnet.lookup(lowerWord, (results) => {
             if (results.length > 0 && results[0].synonyms.length > 0) {
-                words[i] = results[0].synonyms[Math.floor(Math.random() * results[0].synonyms.length)];
+                // Randomly pick a deeper synonym from multiple results
+                const synonyms = results.map(res => res.synonyms).flat();
+                if (synonyms.length > 0) {
+                    words[i] = synonyms[Math.floor(Math.random() * synonyms.length)];
+                }
             }
         });
     }
     return words.join(' ');
 };
 
-// Randomly shuffle sentences and break patterns
+// Randomize sentence order and inject human-like variations
 const shuffleAndVarySentences = (text) => {
     const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
 
@@ -55,6 +59,7 @@ const shuffleAndVarySentences = (text) => {
         const isLong = sentence.split(/\s+/).length > 20;
         const isShort = sentence.split(/\s+/).length < 5;
 
+        // Randomly break or combine sentences
         if (isLong) {
             const midPoint = Math.floor(sentence.length / 2);
             return sentence.slice(0, midPoint) + '. ' + sentence.slice(midPoint);
@@ -66,16 +71,17 @@ const shuffleAndVarySentences = (text) => {
     }).join(' ');
 };
 
-// Introduce human-like errors, punctuation, and randomness
+// Randomly insert punctuation errors and minor human-like edits
 const introduceHumanErrors = (text) => {
     return text.replace(/its/g, "it's")
                .replace(/therefore/g, "therefor")
                .replace(/their/g, "thier")
                .replace(/and/g, "an")
-               .replace(/too/g, "to");
+               .replace(/too/g, "to")
+               .replace(/your/g, "you’re");
 };
 
-// Add diverse tone shifts
+// Add diverse tone shifts and randomly inserted filler phrases
 const addToneShifts = (text) => {
     const tones = [
         'To be honest,', 'Let me tell you,', 'In short,', 'No joke,', 'Not gonna lie,', 'Here’s the deal,', 
@@ -99,7 +105,7 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
         { pattern: /Furthermore,/g, replacement: "Moreover," },
         { pattern: /In conclusion,/g, replacement: "To wrap up," },
         { pattern: /Firstly,/g, replacement: "First of all," },
-        { pattern: /Secondly,/g, replacement: "Secondly," },
+        { pattern: /Secondly,/g, replacement: "Next," },
         { pattern: /Overall,/g, replacement: "All in all," },
         { pattern: /Therefore,/g, replacement: "Thus," }
     ];
@@ -112,7 +118,7 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
     return neutralizedText;
 };
 
-// Local humanization function with deeper variations
+// Humanize text locally by breaking patterns and adding randomness
 const humanizeTextLocally = async (inputText) => {
     let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Neutralize AI patterns
     neutralizedText = await replaceSynonymsWithWordNet(neutralizedText);  // Synonym replacement using WordNet
@@ -141,10 +147,10 @@ const fetchValidatedText = async (inputText) => {
             }
         ],
         max_tokens: maxTokens,
-        temperature: 0.85,  // Increased temperature for more creative responses
-        top_p: 0.9,         // Encourage more diverse output
-        frequency_penalty: 0.5,  // Penalize repetitions
-        presence_penalty: 0.3
+        temperature: 0.9,  // Increased temperature for more diverse responses
+        top_p: 0.95,       // Encourage even more diverse output
+        frequency_penalty: 0.7,  // Penalize repetitions
+        presence_penalty: 0.6
     };
 
     try {
