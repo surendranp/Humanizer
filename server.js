@@ -44,6 +44,20 @@ const replaceSynonymsWithWordNet = async (text) => {
     return words.join(' ');
 };
 
+// Custom idioms and informal phrases
+const idiomsAndPhrases = [
+    "It's a piece of cake",
+    "Break a leg",
+    "Hit the nail on the head",
+    "Bite the bullet",
+    "Let the cat out of the bag",
+    "Kick the bucket",
+    "Burning the midnight oil",
+    "Under the weather",
+    "Cut to the chase",
+    "Throw in the towel",
+];
+
 // Aggressive Paraphrasing with idioms and variations
 const aggressiveParaphrasing = async (text) => {
     const url = 'https://api.openai.com/v1/chat/completions';
@@ -57,7 +71,7 @@ const aggressiveParaphrasing = async (text) => {
         messages: [
             {
                 role: 'user',
-                content: `Make this text sound more natural and less detectable:\n\n${text}\n\nTry to use idioms and informal phrases.`
+                content: `Make this text sound more natural and less detectable:\n\n${text}\n\nUse idioms and informal phrases where appropriate.`
             }
         ],
         temperature: 0.9,
@@ -74,9 +88,40 @@ const aggressiveParaphrasing = async (text) => {
     }
 };
 
-// Sentence Fragmentation
-const fragmentSentences = (text) => {
-    return text.replace(/([a-z0-9])(\. )([A-Z])/g, '$1. $2$3'); // Adds breaks between sentences
+// Introduce human-like errors
+const introduceHumanErrors = (text) => {
+    const errors = [
+        { pattern: /\bthere\b/g, replacement: 'their' },
+        { pattern: /\bdefinitely\b/g, replacement: 'definately' },
+        { pattern: /\bthe\b/g, replacement: 'da' },
+        { pattern: /\byou\b/g, replacement: 'u' },
+        { pattern: /\band\b/g, replacement: '&' },
+    ];
+    let modifiedText = text;
+    errors.forEach(({ pattern, replacement }) => {
+        modifiedText = modifiedText.replace(pattern, replacement);
+    });
+    return modifiedText;
+};
+
+// Randomly shuffle and adjust sentence lengths
+const adjustSentenceLength = (text) => {
+    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
+    const adjustedSentences = sentences.map(sentence => {
+        const words = sentence.split(' ');
+        const lengthVariation = Math.floor(Math.random() * 5) - 2; // Adjust length between -2 to +2
+        if (lengthVariation > 0) {
+            // Add random words to lengthen the sentence
+            for (let i = 0; i < lengthVariation; i++) {
+                words.push('really'); // Simple filler word
+            }
+        } else if (lengthVariation < 0 && words.length > 1) {
+            // Shorten the sentence
+            return words.slice(0, Math.max(words.length + lengthVariation, 1)).join(' ');
+        }
+        return words.join(' ');
+    });
+    return adjustedSentences.join(' ');
 };
 
 // Voice Shifting
@@ -86,7 +131,9 @@ const shiftVoiceRandomly = (text) => {
         if (Math.random() < 0.5) {
             // Change some sentences to passive voice
             const words = sentence.split(' ');
-            return words.length > 1 ? `${words[words.length - 1]} was ${words[0]}` : sentence; // Simple transformation for demo
+            if (words.length > 1) {
+                return `${words[words.length - 1]} was ${words[0]}`; // Simple transformation for demo
+            }
         }
         return sentence;
     }).join(' ');
@@ -107,14 +154,21 @@ app.post('/humanize', async (req, res) => {
         // Step 2: Replace synonyms using WordNet
         let synonymReplacedText = await replaceSynonymsWithWordNet(paraphrasedText);
 
-        // Step 3: Fragment sentences randomly
-        let fragmentedText = fragmentSentences(synonymReplacedText);
+        // Step 3: Introduce human-like errors
+        let errorIntroducedText = introduceHumanErrors(synonymReplacedText);
 
-        // Step 4: Shift voice between active and passive
-        let shiftedVoiceText = shiftVoiceRandomly(fragmentedText);
+        // Step 4: Adjust sentence lengths
+        let lengthAdjustedText = adjustSentenceLength(errorIntroducedText);
 
-        // Step 5: Send the final output
-        res.json({ transformedText: shiftedVoiceText });
+        // Step 5: Shift voice between active and passive
+        let shiftedVoiceText = shiftVoiceRandomly(lengthAdjustedText);
+
+        // Step 6: Add custom idioms and informal phrases
+        const randomIdiom = idiomsAndPhrases[Math.floor(Math.random() * idiomsAndPhrases.length)];
+        const finalText = `${shiftedVoiceText} Also, just to add, ${randomIdiom}.`; // Incorporate idiom into the final output
+
+        // Step 7: Send the final output
+        res.json({ transformedText: finalText });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to humanize text' });
