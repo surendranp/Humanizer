@@ -36,33 +36,23 @@ const synonyms = {
     // Add more synonyms as needed
 };
 
-// Updated synonym replacement with better async handling
+// Context-aware synonym replacement (with WordNet integration)
 const replaceSynonymsContextually = async (text) => {
-    const words = text.split(' ');
-    const promises = words.map(async (word, i) => {
-        let lowerWord = word.toLowerCase();
+    let words = text.split(' ');
+    for (let i = 0; i < words.length; i++) {
+        let lowerWord = words[i].toLowerCase();
         if (synonyms[lowerWord]) {
             let replacementList = synonyms[lowerWord];
             words[i] = replacementList[Math.floor(Math.random() * replacementList.length)];
         } else {
-            // Fetch synonym from WordNet for advanced replacement
-            try {
-                const results = await new Promise((resolve, reject) => {
-                    wordnet.lookup(lowerWord, (err, result) => {
-                        if (err) reject(err);
-                        resolve(result);
-                    });
-                });
+            // Fetch synonym from WordNet for more advanced replacement
+            await wordnet.lookup(lowerWord, (results) => {
                 if (results.length > 0) {
-                    words[i] = results[0].synonyms[0] || word;
+                    words[i] = results[0].synonyms[0] || words[i];
                 }
-            } catch (err) {
-                console.error(`Error fetching synonyms: ${err.message}`);
-            }
+            });
         }
-    });
-    
-    await Promise.all(promises);
+    }
     return words.join(' ');
 };
 
@@ -139,7 +129,7 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Please refine this text to sound more natural, conversational, and informal. Make sure it feels human-like, with dynamic sentence structures and phrasing, so that it is undetectable by AI detection tools:\n\n${inputText}`
+                content: `Please refine this text to sound more natural and human-like, making it undetectable by AI detection tools:\n\n${inputText}`
             }
         ],
         max_tokens: maxTokens,
@@ -153,7 +143,7 @@ const fetchValidatedText = async (inputText) => {
         const response = await axios.post(url, requestData, { headers });
         return response.data.choices[0].message.content;
     } catch (error) {
-        console.error('Error fetching validated text:', error.response ? error.response.data : error.message);
+        console.error('Error details:', error.response ? error.response.data : error.message);
         throw new Error('Failed to fetch validated text from OpenAI API');
     }
 };
