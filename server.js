@@ -21,13 +21,14 @@ app.use(express.static('public')); // Serve static files (HTML, CSS, JS)
 // OpenAI API Key
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Custom idiom and informal phrase list
+// Custom list of idioms and informal phrases
 const idioms = [
     "hit the nail on the head", "bite the bullet", "cut to the chase", 
-    "under the weather", "break the ice", "let the cat out of the bag"
+    "under the weather", "break the ice", "let the cat out of the bag",
+    "burn the midnight oil", "the ball is in your court", "back to the drawing board"
 ];
 
-// Randomly select an idiom or phrase to insert
+// Randomly insert an idiom into the text
 const insertRandomIdiom = (text) => {
     const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
     const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
@@ -36,17 +37,35 @@ const insertRandomIdiom = (text) => {
     return sentences.join(' ');
 };
 
-// Introduce human-like errors
+// Introduce human-like errors and noise (typos, odd spacing)
 const introduceHumanErrors = (text) => {
     return text.replace(/its/g, "it's")
                .replace(/their/g, "thier")
                .replace(/to/g, "too")
-               .replace(/you're/g, "your")
+               .replace(/your/g, "you're")
                .replace(/there/g, "they're")
-               .replace(/and/g, "an");
+               .replace(/and/g, "an")
+               .replace(/ /g, '  ') // Add extra spaces randomly
+               .replace(/,/g, ' , ') // Random space before commas
+               .replace(/\. /g, ' . '); // Add irregular spacing after full stops
 };
 
-// Random length adjustments
+// Aggressive paraphrasing: sentence restructuring
+const aggressiveParaphrase = (text) => {
+    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
+    const rephrased = sentences.map(sentence => {
+        const words = sentence.split(/\s+/);
+        if (words.length > 5) {
+            // Split long sentences or merge short ones
+            const splitPoint = Math.floor(words.length / 2);
+            return words.slice(0, splitPoint).join(' ') + ', ' + words.slice(splitPoint).join(' ');
+        }
+        return words.reverse().join(' '); // Reverse word order as an aggressive change
+    });
+    return rephrased.join('. ');
+};
+
+// Adjust sentence length randomly
 const adjustSentenceLengths = (text) => {
     const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
     return sentences.map(sentence => {
@@ -60,22 +79,8 @@ const adjustSentenceLengths = (text) => {
     }).join(' ');
 };
 
-// Aggressive paraphrasing using WordNet
-const replaceSynonymsWithWordNet = async (text) => {
-    const words = text.split(' ');
-    for (let i = 0; i < words.length; i++) {
-        const lowerWord = words[i].toLowerCase();
-        await wordnet.lookup(lowerWord, (results) => {
-            if (results.length > 0 && results[0].synonyms.length > 0) {
-                words[i] = results[0].synonyms[Math.floor(Math.random() * results[0].synonyms.length)];
-            }
-        });
-    }
-    return words.join(' ');
-};
-
-// OpenAI API call for further validation and variability
-const fetchValidatedText = async (inputText) => {
+// OpenAI API call for further refinement
+const fetchValidatedText = async (inputText, temperature = 0.85, top_p = 0.9) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -91,8 +96,8 @@ const fetchValidatedText = async (inputText) => {
             }
         ],
         max_tokens: 2000,
-        temperature: 0.9,  // Increased for creativity
-        top_p: 0.95,       // Encouraging diversity in the response
+        temperature,  // Increased temperature for variability
+        top_p,        // Increase diversity
         frequency_penalty: 0.5,
         presence_penalty: 0.4
     };
@@ -118,13 +123,17 @@ app.post('/humanize', async (req, res) => {
         // Step 1: Insert custom idioms and informal phrases
         let humanizedText = insertRandomIdiom(inputText);
 
-        // Step 2: Apply local humanization with WordNet and deep sentence variation
-        humanizedText = await replaceSynonymsWithWordNet(humanizedText);
+        // Step 2: Aggressive paraphrasing and sentence restructuring
+        humanizedText = aggressiveParaphrase(humanizedText);
+
+        // Step 3: Introduce human errors and noise
         humanizedText = introduceHumanErrors(humanizedText);
+
+        // Step 4: Adjust sentence lengths
         humanizedText = adjustSentenceLengths(humanizedText);
 
-        // Step 3: Send the text to OpenAI for further adjustments
-        const finalText = await fetchValidatedText(humanizedText);
+        // Step 5: Send the text to OpenAI for further adjustments
+        const finalText = await fetchValidatedText(humanizedText, 0.9, 0.95);
         res.json({ transformedText: finalText });
     } catch (error) {
         console.error('Error:', error);
