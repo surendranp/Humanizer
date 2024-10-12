@@ -27,33 +27,81 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// Synonym replacement dictionary (expanded for better coverage)
-const synonyms = {
-    "happy": ["joyful", "pleased", "content", "delighted"],
-    "sad": ["unhappy", "downhearted", "sorrowful", "dejected"],
-    "difficult": ["challenging", "tough", "hard"],
-    "important": ["crucial", "vital", "significant", "essential"],
-    // Add more synonyms as needed
-};
-
-// Context-aware synonym replacement (with WordNet integration)
-const replaceSynonymsContextually = async (text) => {
-    let words = text.split(' ');
+// Synonym replacement using WordNet and improved dictionary
+const replaceSynonymsWithWordNet = async (text) => {
+    const words = text.split(' ');
     for (let i = 0; i < words.length; i++) {
-        let lowerWord = words[i].toLowerCase();
-        if (synonyms[lowerWord]) {
-            let replacementList = synonyms[lowerWord];
-            words[i] = replacementList[Math.floor(Math.random() * replacementList.length)];
-        } else {
-            // Fetch synonym from WordNet for more advanced replacement
-            await wordnet.lookup(lowerWord, (results) => {
-                if (results.length > 0) {
-                    words[i] = results[0].synonyms[0] || words[i];
-                }
-            });
-        }
+        const lowerWord = words[i].toLowerCase();
+        await wordnet.lookup(lowerWord, (results) => {
+            if (results.length > 0 && results[0].synonyms.length > 0) {
+                words[i] = results[0].synonyms[Math.floor(Math.random() * results[0].synonyms.length)];
+            }
+        });
     }
     return words.join(' ');
+};
+
+// Sentence simplification with improved sentence merging
+const simplifySentences = (text) => {
+    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
+    return sentences.map((sentence, idx) => {
+        const isLong = sentence.split(/\s+/).length > 20;
+        const isShort = sentence.split(/\s+/).length < 5; // Shorter sentence threshold
+        if (isLong) {
+            // Break long sentences
+            const midPoint = Math.floor(sentence.length / 2);
+            return sentence.slice(0, midPoint) + '. ' + sentence.slice(midPoint);
+        } else if (isShort && idx > 0) {
+            // Merge short sentences with the previous one
+            return sentences[idx - 1] + ' ' + sentence;
+        } else {
+            return sentence;
+        }
+    }).join(' ');
+};
+
+// Function to generate tone variations
+const generateToneVariations = (text, tone = 'casual') => {
+    const toneVariations = {
+        casual: [
+            'In short,', 'Honestly,', 'Let me tell you,', 'You see,', 'To wrap it up,', 'So,', 'Anyway,',
+            'By the way,', 'As I said,', 'Well,', 'Basically,', 'In my opinion,', 'You know,', 'I guess,',
+            'For sure,', 'Just saying,', 'Seriously,', 'No doubt,', 'As I mentioned earlier,'
+        ],
+        formal: [
+            'In conclusion,', 'Therefore,', 'However,', 'In summary,', 'Hence,', 'As a result,', 'To clarify,',
+            'It should be noted that', 'To illustrate,', 'Thus,', 'For instance,', 'In my view,', 'Accordingly,',
+            'Moreover,', 'Notably,', 'Consequently,', 'For that reason,', 'In light of this,', 'Similarly,'
+        ],
+        technical: [
+            'From a technical perspective,', 'In technical terms,', 'Based on empirical data,', 'Statistically speaking,',
+            'According to the analysis,', 'From a research standpoint,', 'Given the available data,', 'The evidence suggests,',
+            'In a similar vein,', 'From a scientific point of view,', 'Theoretically,', 'Practically speaking,', 'In terms of metrics,',
+            'Considering the algorithm,', 'Given the scope of the problem,', 'In computational terms,'
+        ]
+    };
+
+    const selectedTonePhrases = toneVariations[tone] || toneVariations.casual; // Default to casual tone if undefined
+
+    // Randomly insert tone phrases at the beginning of some sentences
+    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
+    for (let i = 0; i < sentences.length; i++) {
+        if (Math.random() < 0.2) { // 20% chance of adding a tone phrase
+            const randomPhrase = selectedTonePhrases[Math.floor(Math.random() * selectedTonePhrases.length)];
+            sentences[i] = randomPhrase + ' ' + sentences[i].trim();
+        }
+    }
+
+    return sentences.join(' ');
+};
+
+// Simulate minor human-like errors
+const addHumanErrors = (text) => {
+    // Introduce minor punctuation issues or common typos that are later "fixed"
+    return text.replace(/its/g, "it's")
+               .replace(/therefore/g, "therefor")
+               .replace(/their/g, "thier") // Example of common typo
+               .replace(/and/g, "an");    // Another subtle mistake
 };
 
 // AI pattern detection and neutralization (with better replacements)
@@ -78,39 +126,13 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
     return neutralizedText;
 };
 
-// Sentence restructuring (improving sentence flow) 
-const restructureSentence = (text) => {
-    let sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
-    return sentences.map(sentence => {
-        const startWords = [
-            "Interestingly,",
-            "What stands out is that",
-            "You might notice that",
-            "It's worth mentioning that"
-        ];
-        const randomStart = startWords[Math.floor(Math.random() * startWords.length)];
-        return `${randomStart} ${sentence}`;
-    }).join(' ');
-};
-
-// Add personal touch for informality
-const addPersonalTouches = (text) => {
-    const personalPhrases = [
-        "Honestly, it seems like...",
-        "To be honest, I'd say...",
-        "Have you ever thought about...",
-        "Let me tell you, it's quite interesting..."
-    ];
-    const randomPhrase = personalPhrases[Math.floor(Math.random() * personalPhrases.length)];
-    return `${randomPhrase} ${text}`;
-};
-
-// Humanize text locally
-const humanizeTextLocally = async (inputText) => {
+// Final local humanization function (with improvements)
+const humanizeTextLocally = async (inputText, tone = 'casual') => {
     let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Neutralize AI patterns
-    neutralizedText = await replaceSynonymsContextually(neutralizedText);  // Contextual synonym replacement
-    neutralizedText = restructureSentence(neutralizedText);  // Restructure sentences
-    neutralizedText = addPersonalTouches(neutralizedText);  // Add informal tone
+    neutralizedText = await replaceSynonymsWithWordNet(neutralizedText);  // Synonym replacement using WordNet
+    neutralizedText = simplifySentences(neutralizedText);  // Sentence simplification
+    neutralizedText = generateToneVariations(neutralizedText, tone);  // Tone adjustment (with 50 variations)
+    neutralizedText = addHumanErrors(neutralizedText);  // Add minor human-like errors
     return neutralizedText;
 };
 
@@ -133,10 +155,10 @@ const fetchValidatedText = async (inputText) => {
             }
         ],
         max_tokens: maxTokens,
-        temperature: 1.0,  // Increased temperature for more creative responses
-        top_p: 1.0,         // Encourage more diverse output
+        temperature: 0.85,  // Increased temperature for more creative responses
+        top_p: 0.9,         // Encourage more diverse output
         frequency_penalty: 0.5,  // Penalize repetitions
-        presence_penalty: 0.5
+        presence_penalty: 0.3
     };
 
     try {
@@ -150,15 +172,15 @@ const fetchValidatedText = async (inputText) => {
 
 // API route to handle text transformation
 app.post('/humanize', async (req, res) => {
-    const { inputText } = req.body;
+    const { inputText, tone = 'casual' } = req.body;
 
     if (!inputText || inputText.trim() === '') {
         return res.status(400).json({ error: 'Input text cannot be empty' });
     }
 
     try {
-        // Step 1: Apply local humanization
-        let humanizedText = await humanizeTextLocally(inputText);
+        // Step 1: Apply local humanization with WordNet and sentence simplification
+        let humanizedText = await humanizeTextLocally(inputText, tone);
 
         // Step 2: Send the text to OpenAI for further adjustments
         const finalText = await fetchValidatedText(humanizedText);
