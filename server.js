@@ -2,134 +2,101 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const natural = require('natural');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const wordnet = new natural.WordNet();
 
 // Middleware setup
-app.use(cors({
-    origin: '*',
-    methods: 'GET,POST,PUT,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization',
-}));
+app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public')); // Serve static files (HTML, CSS, JS)
+app.use(express.static('public'));
 
 // OpenAI API Key
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Function to estimate the number of tokens based on input text length
+// Function to estimate tokens
 const estimateTokens = (inputText) => {
     const wordCount = inputText.split(/\s+/).length;
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// List of idioms and informal phrases
-const idioms = [
-    "It's a piece of cake",
-    "Break the ice",
-    "Hit the nail on the head",
-    "Bite the bullet",
-    "Let the cat out of the bag",
-    // Add more idioms as needed
+// Profiles for varied voice and errors
+const profiles = [
+    {
+        name: "Casual Writer",
+        style: "slightly informal",
+        commonErrors: ["its vs it's", "run-on sentences", "minor grammatical errors"],
+        fillerWords: ["you know", "basically", "kind of", "well"]
+    },
+    {
+        name: "Academic Writer",
+        style: "formal, academic",
+        commonErrors: ["complex sentence structures", "occasional passive voice", "long-winded explanations"],
+        fillerWords: ["moreover", "in addition", "thus", "furthermore"]
+    },
+    {
+        name: "Conversationalist",
+        style: "informal and chatty",
+        commonErrors: ["shortened words", "slang", "missing punctuation"],
+        fillerWords: ["like", "honestly", "seriously", "totally"]
+    }
 ];
 
-// Function to randomly incorporate idioms and informal phrases
-const incorporateIdioms = (text) => {
-    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
-    return sentences.map(sentence => {
-        if (Math.random() < 0.2) { // 20% chance to add an idiom
-            const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
-            return sentence + " " + randomIdiom;
-        }
-        return sentence;
-    }).join(' ');
-};
+// Idioms and informal phrases
+const idioms = [
+    "the ball is in your court", "bite the bullet", "break the ice", 
+    "hit the nail on the head", "let the cat out of the bag", 
+    "spill the beans", "under the weather"
+];
 
-// Randomly introduce human-like errors
-const introduceHumanErrors = (text) => {
-    return text.replace(/its/g, "it's")
-               .replace(/therefore/g, "therefor")
-               .replace(/an/g, "and")
-               .replace(/the best/g, "the bestest")
-               .replace(/\b(?<!\S)\w{4}\b/g, (match) => {
-                   return Math.random() < 0.3 ? match.split('').reverse().join('') : match; // 30% chance to reverse 4-letter words
-               });
-};
+// Function to apply human-like errors and variability
+const applyProfile = (text, profile) => {
+    let newText = text;
+    const { commonErrors, fillerWords } = profile;
 
-// Aggressive paraphrasing using WordNet
-const replaceSynonymsWithWordNet = async (text) => {
-    const words = text.split(' ');
-    for (let i = 0; i < words.length; i++) {
-        const lowerWord = words[i].toLowerCase();
-        await wordnet.lookup(lowerWord, (results) => {
-            if (results.length > 0 && results[0].synonyms.length > 0) {
-                words[i] = results[0].synonyms[Math.floor(Math.random() * results[0].synonyms.length)];
+    // Introduce common writing errors
+    commonErrors.forEach(error => {
+        newText = newText.replace(new RegExp(error, 'g'), (match) => {
+            if (Math.random() < 0.2) {
+                return match + " (typo)";
             }
+            return match;
         });
-    }
-    return words.join(' ');
-};
-
-// Adjust sentence lengths randomly
-const randomLengthAdjustment = (text) => {
-    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
-    return sentences.map(sentence => {
-        const addWords = Math.floor(Math.random() * 4); // Randomly add 0-3 words
-        const additionalWords = " and maybe even just a little bit more".split(' ').slice(0, addWords).join(' ');
-        return sentence + additionalWords;
-    }).join(' ');
-};
-
-// Adjust the tone of the text
-const adjustTone = (text) => {
-    const tones = [
-        "Honestly, ", "I gotta say, ", "Let me be real with you, ", "No kidding, ", "In my opinion, "
-    ];
-    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
-    return sentences.map((sentence, idx) => {
-        if (Math.random() < 0.2) { // 20% chance to adjust tone
-            const randomTone = tones[Math.floor(Math.random() * tones.length)];
-            return randomTone + sentence;
-        }
-        return sentence;
-    }).join(' ');
-};
-
-// AI pattern detection and neutralization
-const detectAndNeutralizeAIPatterns = (inputText) => {
-    const aiPatterns = [
-        { pattern: /Furthermore,/g, replacement: "Moreover," },
-        { pattern: /In conclusion,/g, replacement: "To wrap up," },
-        { pattern: /Firstly,/g, replacement: "First of all," },
-        { pattern: /Secondly,/g, replacement: "Secondly," },
-        { pattern: /Overall,/g, replacement: "All in all," },
-        { pattern: /Therefore,/g, replacement: "Thus," }
-    ];
-
-    let neutralizedText = inputText;
-    aiPatterns.forEach(({ pattern, replacement }) => {
-        neutralizedText = neutralizedText.replace(pattern, replacement);
     });
 
-    return neutralizedText;
+    // Add filler words randomly
+    newText = newText.replace(/\b(\w+\s?\w+)\b/g, (match) => {
+        if (Math.random() < 0.15) {
+            return match + " " + fillerWords[Math.floor(Math.random() * fillerWords.length)];
+        }
+        return match;
+    });
+
+    // Add random idioms
+    newText = newText.replace(/\b(\w+\s?\w+)\b/g, (match) => {
+        if (Math.random() < 0.1) {
+            return match + " " + idioms[Math.floor(Math.random() * idioms.length)];
+        }
+        return match;
+    });
+
+    return newText;
 };
 
-// Local humanization function with deeper variations
-const humanizeTextLocally = async (inputText) => {
-    let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Neutralize AI patterns
-    neutralizedText = await replaceSynonymsWithWordNet(neutralizedText);  // Synonym replacement using WordNet
-    neutralizedText = incorporateIdioms(neutralizedText);  // Add idioms
-    neutralizedText = introduceHumanErrors(neutralizedText);  // Add minor human-like errors
-    neutralizedText = randomLengthAdjustment(neutralizedText);  // Adjust sentence lengths
-    neutralizedText = adjustTone(neutralizedText);  // Tone adjustments
-    return neutralizedText;
+// Function to shuffle sentences
+const shuffleSentences = (text) => {
+    const sentences = text.split(/(?<=\.|\?|\!)\s+/);
+
+    for (let i = sentences.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [sentences[i], sentences[j]] = [sentences[j], sentences[i]];
+    }
+
+    return sentences.join(' ');
 };
 
-// Function to validate and refine text via OpenAI API
+// Function to fetch text from OpenAI API
 const fetchValidatedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -137,33 +104,26 @@ const fetchValidatedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
-    const maxTokens = estimateTokens(inputText);
-
     const requestData = {
         model: 'gpt-3.5-turbo',
-        messages: [
-            {
-                role: 'user',
-                content: `Please refine this text to sound more natural and human-like, making it undetectable by AI detection tools:\n\n${inputText}`
-            }
-        ],
-        max_tokens: maxTokens,
-        temperature: 1.0,  // Increased temperature for more creative responses
-        top_p: 0.95,         // Encourage more diverse output
-        frequency_penalty: 0.5,  // Penalize repetitions
-        presence_penalty: 0.3
+        messages: [{ role: 'user', content: inputText }],
+        max_tokens: estimateTokens(inputText),
+        temperature: 0.9,  // High creativity
+        top_p: 0.9,
+        frequency_penalty: 0.6,
+        presence_penalty: 0.5
     };
 
     try {
         const response = await axios.post(url, requestData, { headers });
         return response.data.choices[0].message.content;
     } catch (error) {
-        console.error('Error details:', error.response ? error.response.data : error.message);
-        throw new Error('Failed to fetch validated text from OpenAI API');
+        console.error('Error fetching from OpenAI:', error.message);
+        throw new Error('Failed to fetch validated text');
     }
 };
 
-// API route to handle text transformation
+// Main API route
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -172,24 +132,25 @@ app.post('/humanize', async (req, res) => {
     }
 
     try {
-        // Step 1: Apply local humanization with WordNet and deep sentence variation
-        let humanizedText = await humanizeTextLocally(inputText);
+        // Apply random profile
+        const profile = profiles[Math.floor(Math.random() * profiles.length)];
+        console.log(`Applying profile: ${profile.name}`);
 
-        // Step 2: Send the text to OpenAI for further adjustments
-        const finalText = await fetchValidatedText(humanizedText);
+        let humanizedText = applyProfile(inputText, profile);  // Apply errors and filler words
+        humanizedText = shuffleSentences(humanizedText);  // Shuffle sentence order
+
+        // Perform multiple passes with OpenAI API
+        let finalText = await fetchValidatedText(humanizedText);
+        finalText = await fetchValidatedText(finalText);  // Another pass for refining
+
         res.json({ transformedText: finalText });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error:', error.message);
         res.status(500).json({ error: 'Failed to humanize text' });
     }
 });
 
-// Serve the index.html at the root route
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
-});
-
-// Start the server
+// Start server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
