@@ -27,7 +27,7 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// Synonym replacement using WordNet and improved dictionary
+// Synonym replacement using WordNet and a diverse dictionary
 const replaceSynonymsWithWordNet = async (text) => {
     const words = text.split(' ');
     for (let i = 0; i < words.length; i++) {
@@ -41,18 +41,24 @@ const replaceSynonymsWithWordNet = async (text) => {
     return words.join(' ');
 };
 
-// Sentence simplification with improved sentence merging
-const simplifySentences = (text) => {
+// Randomly shuffle sentences and break patterns
+const shuffleAndVarySentences = (text) => {
     const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
+
+    // Shuffle sentence order randomly
+    for (let i = sentences.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [sentences[i], sentences[j]] = [sentences[j], sentences[i]];
+    }
+
     return sentences.map((sentence, idx) => {
         const isLong = sentence.split(/\s+/).length > 20;
-        const isShort = sentence.split(/\s+/).length < 5; // Shorter sentence threshold
+        const isShort = sentence.split(/\s+/).length < 5;
+
         if (isLong) {
-            // Break long sentences
             const midPoint = Math.floor(sentence.length / 2);
             return sentence.slice(0, midPoint) + '. ' + sentence.slice(midPoint);
         } else if (isShort && idx > 0) {
-            // Merge short sentences with the previous one
             return sentences[idx - 1] + ' ' + sentence;
         } else {
             return sentence;
@@ -60,62 +66,42 @@ const simplifySentences = (text) => {
     }).join(' ');
 };
 
-// Function to generate tone variations
-const generateToneVariations = (text, tone = 'casual') => {
-    const toneVariations = {
-        casual: [
-            'In short,', 'Honestly,', 'Let me tell you,', 'You see,', 'To wrap it up,', 'So,', 'Anyway,',
-            'By the way,', 'As I said,', 'Well,', 'Basically,', 'In my opinion,', 'You know,', 'I guess,',
-            'For sure,', 'Just saying,', 'Seriously,', 'No doubt,', 'As I mentioned earlier,'
-        ],
-        formal: [
-            'In conclusion,', 'Therefore,', 'However,', 'In summary,', 'Hence,', 'As a result,', 'To clarify,',
-            'It should be noted that', 'To illustrate,', 'Thus,', 'For instance,', 'In my view,', 'Accordingly,',
-            'Moreover,', 'Notably,', 'Consequently,', 'For that reason,', 'In light of this,', 'Similarly,'
-        ],
-        technical: [
-            'From a technical perspective,', 'In technical terms,', 'Based on empirical data,', 'Statistically speaking,',
-            'According to the analysis,', 'From a research standpoint,', 'Given the available data,', 'The evidence suggests,',
-            'In a similar vein,', 'From a scientific point of view,', 'Theoretically,', 'Practically speaking,', 'In terms of metrics,',
-            'Considering the algorithm,', 'Given the scope of the problem,', 'In computational terms,'
-        ]
-    };
-
-    const selectedTonePhrases = toneVariations[tone] || toneVariations.casual; // Default to casual tone if undefined
-
-    // Randomly insert tone phrases at the beginning of some sentences
-    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
-    for (let i = 0; i < sentences.length; i++) {
-        if (Math.random() < 0.2) { // 20% chance of adding a tone phrase
-            const randomPhrase = selectedTonePhrases[Math.floor(Math.random() * selectedTonePhrases.length)];
-            sentences[i] = randomPhrase + ' ' + sentences[i].trim();
-        }
-    }
-
-    return sentences.join(' ');
-};
-
-// Simulate minor human-like errors
-const addHumanErrors = (text) => {
-    // Introduce minor punctuation issues or common typos that are later "fixed"
+// Introduce human-like errors, punctuation, and randomness
+const introduceHumanErrors = (text) => {
     return text.replace(/its/g, "it's")
                .replace(/therefore/g, "therefor")
-               .replace(/their/g, "thier") // Example of common typo
-               .replace(/and/g, "an");    // Another subtle mistake
+               .replace(/their/g, "thier")
+               .replace(/and/g, "an")
+               .replace(/too/g, "to");
 };
 
-// AI pattern detection and neutralization (with better replacements)
+// Add diverse tone shifts
+const addToneShifts = (text) => {
+    const tones = [
+        'To be honest,', 'Let me tell you,', 'In short,', 'No joke,', 'Not gonna lie,', 'Here’s the deal,', 
+        'Honestly speaking,', 'Let’s be real,', 'Straight up,', 'On the other hand,', 'But,', 'Anyway,',
+        'To wrap up,', 'As you can see,', 'All things considered,', 'At the end of the day,', 'Frankly,'
+    ];
+    const sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
+
+    return sentences.map((sentence, idx) => {
+        if (Math.random() < 0.3) {
+            const randomTone = tones[Math.floor(Math.random() * tones.length)];
+            return randomTone + ' ' + sentence;
+        }
+        return sentence;
+    }).join(' ');
+};
+
+// AI pattern detection and neutralization
 const detectAndNeutralizeAIPatterns = (inputText) => {
     const aiPatterns = [
-        { pattern: /Furthermore,/g, replacement: "Additionally," },
-        { pattern: /In conclusion,/g, replacement: "To wrap things up," },
-        { pattern: /Firstly,/g, replacement: "To start with," },
-        { pattern: /Secondly,/g, replacement: "Next," },
+        { pattern: /Furthermore,/g, replacement: "Moreover," },
+        { pattern: /In conclusion,/g, replacement: "To wrap up," },
+        { pattern: /Firstly,/g, replacement: "First of all," },
+        { pattern: /Secondly,/g, replacement: "Secondly," },
         { pattern: /Overall,/g, replacement: "All in all," },
-        { pattern: /Therefore,/g, replacement: "Thus," },
-        { pattern: /research-based/g, replacement: "evidence-backed" },
-        { pattern: /It is recommended that/g, replacement: "I suggest that" },
-        // Add more patterns as needed
+        { pattern: /Therefore,/g, replacement: "Thus," }
     ];
 
     let neutralizedText = inputText;
@@ -126,13 +112,13 @@ const detectAndNeutralizeAIPatterns = (inputText) => {
     return neutralizedText;
 };
 
-// Final local humanization function (with improvements)
-const humanizeTextLocally = async (inputText, tone = 'casual') => {
+// Local humanization function with deeper variations
+const humanizeTextLocally = async (inputText) => {
     let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Neutralize AI patterns
     neutralizedText = await replaceSynonymsWithWordNet(neutralizedText);  // Synonym replacement using WordNet
-    neutralizedText = simplifySentences(neutralizedText);  // Sentence simplification
-    neutralizedText = generateToneVariations(neutralizedText, tone);  // Tone adjustment (with 50 variations)
-    neutralizedText = addHumanErrors(neutralizedText);  // Add minor human-like errors
+    neutralizedText = shuffleAndVarySentences(neutralizedText);  // Sentence shuffling and pattern variation
+    neutralizedText = addToneShifts(neutralizedText);  // Tone shifts
+    neutralizedText = introduceHumanErrors(neutralizedText);  // Add minor human-like errors
     return neutralizedText;
 };
 
@@ -172,15 +158,15 @@ const fetchValidatedText = async (inputText) => {
 
 // API route to handle text transformation
 app.post('/humanize', async (req, res) => {
-    const { inputText, tone = 'casual' } = req.body;
+    const { inputText } = req.body;
 
     if (!inputText || inputText.trim() === '') {
         return res.status(400).json({ error: 'Input text cannot be empty' });
     }
 
     try {
-        // Step 1: Apply local humanization with WordNet and sentence simplification
-        let humanizedText = await humanizeTextLocally(inputText, tone);
+        // Step 1: Apply local humanization with WordNet and deep sentence variation
+        let humanizedText = await humanizeTextLocally(inputText);
 
         // Step 2: Send the text to OpenAI for further adjustments
         const finalText = await fetchValidatedText(humanizedText);
