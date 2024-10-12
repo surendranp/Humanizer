@@ -34,7 +34,6 @@ const replaceSynonymsWithWordNet = async (text) => {
         const lowerWord = words[i].toLowerCase();
         await wordnet.lookup(lowerWord, (results) => {
             if (results.length > 0 && results[0].synonyms.length > 0) {
-                // Randomly pick a synonym
                 const synonyms = results[0].synonyms;
                 if (synonyms.length > 0) {
                     words[i] = synonyms[Math.floor(Math.random() * synonyms.length)];
@@ -45,8 +44,8 @@ const replaceSynonymsWithWordNet = async (text) => {
     return words.join(' ');
 };
 
-// Multi-layer paraphrasing for randomization
-const multiLayerParaphrasing = async (text) => {
+// Aggressive Paraphrasing with idioms and variations
+const aggressiveParaphrasing = async (text) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -58,11 +57,11 @@ const multiLayerParaphrasing = async (text) => {
         messages: [
             {
                 role: 'user',
-                content: `Paraphrase this text to make it more human-like and less detectable:\n\n${text}`
+                content: `Make this text sound more natural and less detectable:\n\n${text}\n\nTry to use idioms and informal phrases.`
             }
         ],
-        temperature: 0.8,
-        top_p: 0.9,
+        temperature: 0.9,
+        top_p: 0.95,
         max_tokens: estimateTokens(text),
     };
 
@@ -86,7 +85,8 @@ const shiftVoiceRandomly = (text) => {
     return sentences.map(sentence => {
         if (Math.random() < 0.5) {
             // Change some sentences to passive voice
-            return sentence.replace(/(\w+)(\s\w+)+/, "$2 was $1");
+            const words = sentence.split(' ');
+            return words.length > 1 ? `${words[words.length - 1]} was ${words[0]}` : sentence; // Simple transformation for demo
         }
         return sentence;
     }).join(' ');
@@ -101,8 +101,8 @@ app.post('/humanize', async (req, res) => {
     }
 
     try {
-        // Step 1: Paraphrase the input text with OpenAI
-        let paraphrasedText = await multiLayerParaphrasing(inputText);
+        // Step 1: Paraphrase the input text aggressively
+        let paraphrasedText = await aggressiveParaphrasing(inputText);
 
         // Step 2: Replace synonyms using WordNet
         let synonymReplacedText = await replaceSynonymsWithWordNet(paraphrasedText);
