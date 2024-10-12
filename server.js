@@ -14,8 +14,9 @@ app.use(cors({
     allowedHeaders: 'Content-Type,Authorization',
 }));
 app.use(bodyParser.json());
-app.use(express.static('public')); // Serve static files (HTML, CSS, JS)
+app.use(express.static('public'));
 
+// OpenAI API Key
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // Custom idioms and informal phrases
@@ -105,7 +106,24 @@ const fetchValidatedText = async (inputText, temperature = 0.9, top_p = 0.95) =>
     }
 };
 
-// API route to handle text transformation
+// Token similarity check
+const calculateAiHumanScore = (originalText, transformedText) => {
+    const originalWords = originalText.split(/\s+/);
+    const transformedWords = transformedText.split(/\s+/);
+
+    const commonWords = originalWords.filter(word => transformedWords.includes(word));
+    const similarityRatio = commonWords.length / originalWords.length;
+
+    const aiGeneratedPercentage = similarityRatio * 100;
+    const humanizedPercentage = 100 - aiGeneratedPercentage;
+
+    return {
+        aiGeneratedPercentage: aiGeneratedPercentage.toFixed(2),
+        humanizedPercentage: humanizedPercentage.toFixed(2),
+    };
+};
+
+// API route to handle text transformation and scoring
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -126,13 +144,14 @@ app.post('/humanize', async (req, res) => {
         // Step 4: Fetch validated text from OpenAI
         const finalText = await fetchValidatedText(humanizedText);
         
-        // Optional: Re-check if the output still falls into detectable patterns and re-process
-        if (finalText.includes("AI") || finalText.includes("generated")) {
-            // Possibly add reprocessing logic here if needed
-            console.log("Output flagged as AI-generated, consider reprocessing.");
-        }
+        // Step 5: Calculate AI and humanized content ratio
+        const { aiGeneratedPercentage, humanizedPercentage } = calculateAiHumanScore(inputText, finalText);
 
-        res.json({ transformedText: finalText });
+        res.json({
+            transformedText: finalText,
+            aiGeneratedPercentage,
+            humanizedPercentage
+        });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to humanize text' });
