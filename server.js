@@ -2,10 +2,12 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const natural = require('natural');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const wordnet = new natural.WordNet();
 
 // Middleware setup
 app.use(cors({
@@ -13,11 +15,8 @@ app.use(cors({
     methods: 'GET,POST,PUT,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type,Authorization',
 }));
-
 app.use(bodyParser.json());
-
-// Serve the static files (like index.html, CSS, and JS)
-app.use(express.static('public'));
+app.use(express.static('public')); // Serve static files (HTML, CSS, JS)
 
 // OpenAI API Key
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -28,7 +27,7 @@ const estimateTokens = (inputText) => {
     return Math.min(Math.ceil(wordCount * 1.33), 2048);
 };
 
-// Synonym replacement dictionary
+// Synonym replacement dictionary (expanded for better coverage)
 const synonyms = {
     "happy": ["joyful", "pleased", "content", "delighted"],
     "sad": ["unhappy", "downhearted", "sorrowful", "dejected"],
@@ -37,46 +36,52 @@ const synonyms = {
     // Add more synonyms as needed
 };
 
-// Context-aware synonym replacement
-const replaceSynonymsContextually = (text) => {
-    return text.split(' ').map((word) => {
-        const lowerWord = word.toLowerCase();
-        // Use a more advanced context check here if needed
+// Context-aware synonym replacement (with WordNet integration)
+const replaceSynonymsContextually = async (text) => {
+    let words = text.split(' ');
+    for (let i = 0; i < words.length; i++) {
+        let lowerWord = words[i].toLowerCase();
         if (synonyms[lowerWord]) {
-            const replacementList = synonyms[lowerWord];
-            return replacementList[Math.floor(Math.random() * replacementList.length)];
+            let replacementList = synonyms[lowerWord];
+            words[i] = replacementList[Math.floor(Math.random() * replacementList.length)];
+        } else {
+            // Fetch synonym from WordNet for more advanced replacement
+            await wordnet.lookup(lowerWord, (results) => {
+                if (results.length > 0) {
+                    words[i] = results[0].synonyms[0] || words[i];
+                }
+            });
         }
-        return word;
-    }).join(' ');
+    }
+    return words.join(' ');
 };
 
-// AI pattern detection and neutralization
+// AI pattern detection and neutralization (with better replacements)
 const detectAndNeutralizeAIPatterns = (inputText) => {
     const aiPatterns = [
-        /Furthermore,/g,
-        /In conclusion,/g,
-        /Firstly,/g,
-        /Secondly,/g,
-        /Overall,/g,
-        /Therefore,/g,
-        /research-based/g,
-        /It is recommended that/g,
+        { pattern: /Furthermore,/g, replacement: "Additionally," },
+        { pattern: /In conclusion,/g, replacement: "To wrap things up," },
+        { pattern: /Firstly,/g, replacement: "To start with," },
+        { pattern: /Secondly,/g, replacement: "Next," },
+        { pattern: /Overall,/g, replacement: "All in all," },
+        { pattern: /Therefore,/g, replacement: "Thus," },
+        { pattern: /research-based/g, replacement: "evidence-backed" },
+        { pattern: /It is recommended that/g, replacement: "I suggest that" },
         // Add more patterns as needed
     ];
 
     let neutralizedText = inputText;
-    aiPatterns.forEach((pattern) => {
-        neutralizedText = neutralizedText.replace(pattern, '');
+    aiPatterns.forEach(({ pattern, replacement }) => {
+        neutralizedText = neutralizedText.replace(pattern, replacement);
     });
 
     return neutralizedText;
 };
 
-// Sentence restructuring
+// Sentence restructuring (improving sentence flow)
 const restructureSentence = (text) => {
     let sentences = text.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/);
     return sentences.map(sentence => {
-        // Use varied sentence starters and structures
         const startWords = [
             "Interestingly,",
             "What stands out is that",
@@ -88,7 +93,7 @@ const restructureSentence = (text) => {
     }).join(' ');
 };
 
-// Add human-like variations and informal touches
+// Add personal touch for informality
 const addPersonalTouches = (text) => {
     const personalPhrases = [
         "Honestly, it seems like...",
@@ -100,10 +105,10 @@ const addPersonalTouches = (text) => {
     return `${randomPhrase} ${text}`;
 };
 
-// Advanced text humanization function
-const humanizeTextLocally = (inputText) => {
+// Humanize text locally
+const humanizeTextLocally = async (inputText) => {
     let neutralizedText = detectAndNeutralizeAIPatterns(inputText);  // Neutralize AI patterns
-    neutralizedText = replaceSynonymsContextually(neutralizedText);  // Contextual synonym replacement
+    neutralizedText = await replaceSynonymsContextually(neutralizedText);  // Contextual synonym replacement
     neutralizedText = restructureSentence(neutralizedText);  // Restructure sentences
     neutralizedText = addPersonalTouches(neutralizedText);  // Add informal tone
     return neutralizedText;
@@ -128,10 +133,10 @@ const fetchValidatedText = async (inputText) => {
             }
         ],
         max_tokens: maxTokens,
-        temperature: 0.7,
-        top_p: 1.0,
-        frequency_penalty: 0,
-        presence_penalty: 0
+        temperature: 0.85,  // Increased temperature for more creative responses
+        top_p: 0.9,         // Encourage more diverse output
+        frequency_penalty: 0.5,  // Penalize repetitions
+        presence_penalty: 0.3
     };
 
     try {
@@ -153,7 +158,7 @@ app.post('/humanize', async (req, res) => {
 
     try {
         // Step 1: Apply local humanization
-        let humanizedText = humanizeTextLocally(inputText);
+        let humanizedText = await humanizeTextLocally(inputText);
 
         // Step 2: Send the text to OpenAI for further adjustments
         const finalText = await fetchValidatedText(humanizedText);

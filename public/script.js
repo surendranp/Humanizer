@@ -22,7 +22,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         });
 
         if (!response.ok) {
-            throw new Error('Failed to humanize text');
+            throw new Error(`Failed to humanize text. Status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -35,7 +35,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
     } catch (error) {
         console.error('Error:', error);
-        alert('Error occurred while humanizing the text. Please try again.');
+        alert(`Error occurred while humanizing the text: ${error.message}`);
         document.getElementById('loader').style.display = 'none';
     }
 });
@@ -57,7 +57,7 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
         });
 
         if (!response.ok) {
-            throw new Error('Failed to humanize text');
+            throw new Error(`Failed to humanize text. Status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -66,24 +66,11 @@ document.getElementById('retryBtn').addEventListener('click', async function () 
         document.getElementById('humanizedText').innerText = data.transformedText;
         const outputWordCount = data.transformedText.trim().split(/\s+/).length;
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+        document.getElementById('retryBtn').style.display = 'inline';
 
     } catch (error) {
         console.error('Error:', error);
-        alert('Error occurred while humanizing the text. Please try again.');
+        alert(`Error occurred while humanizing the text: ${error.message}`);
         document.getElementById('loader').style.display = 'none';
     }
-});
-
-document.getElementById('clearBtn').addEventListener('click', function () {
-    document.getElementById('inputText').value = '';
-    document.getElementById('humanizedText').innerText = 'Your transformed text will appear here...';
-    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
-    document.getElementById('wordCount').innerText = 'Word Count: 0';
-    document.getElementById('retryBtn').style.display = 'none';
-});
-
-document.getElementById('inputText').addEventListener('input', function () {
-    const inputText = this.value;
-    const wordCount = inputText.trim() === '' ? 0 : inputText.trim().split(/\s+/).length;
-    document.getElementById('wordCount').innerText = `Word Count: ${wordCount}`;
 });
