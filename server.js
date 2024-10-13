@@ -28,6 +28,12 @@ const idioms = [
     "A stitch in time saves nine",
     "When pigs fly",
     "Under the weather",
+    "Piece of cake",           // New idioms
+    "The ball is in your court",
+    "The best of both worlds",
+    "A dime a dozen",
+    "Let the cat out of the bag",
+    "Barking up the wrong tree"
 ];
 
 // Function to introduce random spelling/grammar errors
@@ -40,6 +46,11 @@ const introduceErrors = (text) => {
         { pattern: /lose/g, replacement: "loose" },
         { pattern: /your/g, replacement: "you're" },
         { pattern: /then/g, replacement: "than" },
+        { pattern: /definitely/g, replacement: "definately" },  // New errors
+        { pattern: /separate/g, replacement: "seperate" },
+        { pattern: /occasionally/g, replacement: "occassionally" },
+        { pattern: /received/g, replacement: "recieved" },
+        { pattern: /believe/g, replacement: "beleive" }
     ];
     return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
@@ -47,7 +58,9 @@ const introduceErrors = (text) => {
 // Function to add slight conversational filler
 const addFillerWords = (text) => {
     const fillers = [
-        "you know,", "well,", "basically,", "to be honest,", "like I said,", "I guess,", "sort of,"
+       "you know,", "well,", "basically,", "to be honest,", "like I said,", 
+        "I guess,", "sort of,", "actually,", "you see,", "just saying,", // New fillers
+        "I mean,", "kind of,", "right?"
     ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
@@ -87,14 +100,21 @@ const addIdiomsAndPhrases = (text) => {
 const aggressiveParaphrase = (text) => {
     return text
         .replace(/important/g, "crucial")
-        .replace(/difficult/g, "tough")
-        .replace(/think/g, "guess")
-        .replace(/result/g, "consequence")
-        .replace(/shows/g, "indicates")
-        .replace(/However,/g, "Still,")
-        .replace(/Furthermore,/g, "Besides that,")
-        .replace(/Moreover,/g, "In addition to that,")
-        .replace(/benefits/g, "upsides");
+        .replace(/difficult/g, "challenging")
+        .replace(/think/g, "believe")
+        .replace(/result/g, "outcome")
+        .replace(/shows/g, "demonstrates")
+        .replace(/However,/g, "Nonetheless,")
+        .replace(/Furthermore,/g, "Moreover,")
+        .replace(/Moreover,/g, "In addition,")
+        .replace(/benefits/g, "advantages")
+        .replace(/utilize/g, "use")
+        .replace(/obtain/g, "get")
+        .replace(/start/g, "begin")
+        .replace(/end/g, "conclude")
+        .replace(/suggest/g, "propose")
+        .replace(/happy/g, "content")
+        .replace(/sad/g, "unhappy");
 };
 
 // Applying all transformations for humanization
