@@ -106,7 +106,7 @@ const humanizeTextLocally = (inputText) => {
     return text;
 };
 
-// OpenAI API function for final refinements with more randomness
+// OpenAI API function for final refinements with corrected randomness
 const fetchValidatedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -124,7 +124,7 @@ const fetchValidatedText = async (inputText) => {
         ],
         max_tokens: 2048,
         temperature: Math.random() * 0.5 + 0.7,  // Vary temperature between 0.7 and 1.2 for more creativity
-        top_p: Math.random() * 0.5 + 0.6,        // Vary top_p for random variability
+        top_p: Math.min(Math.random() * 0.4 + 0.6, 1),  // Corrected: Ensure top_p never exceeds 1
         frequency_penalty: 1.5,                  // Encourage variability in words
         presence_penalty: 1.7                    // Reduce consistent patterns
     };
