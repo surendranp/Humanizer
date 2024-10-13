@@ -38,11 +38,27 @@ const introduceErrors = (text) => {
     return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
 
-// Introduce random sentence length variations
-const adjustSentenceLength = (text) => {
+// Function to add slight conversational filler
+const addFillerWords = (text) => {
+    const fillers = [
+        "you know,", "well,", "basically,", "to be honest,", "like I said,"
+    ];
+    const sentences = text.split('.');
+    return sentences.map(sentence => {
+        if (Math.random() < 0.3) {
+            const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
+            return `${randomFiller} ${sentence}`;
+        }
+        return sentence;
+    }).join('. ');
+};
+
+// Function to randomly merge or split sentences
+const adjustSentenceStructure = (text) => {
     let sentences = text.split('.');
     sentences = sentences.map(sentence => {
         if (Math.random() > 0.5) return sentence + ', ' + sentence;  // Combine sentences randomly
+        if (sentence.length > 15 && Math.random() < 0.5) return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);  // Split long sentences
         return sentence;
     });
     return sentences.join('. ');
@@ -69,9 +85,10 @@ const aggressiveParaphrase = (text) => {
 // Stronger humanization logic with idioms, paraphrasing, and errors
 const humanizeTextLocally = (inputText) => {
     let text = introduceErrors(inputText);            // Step 1: Introduce errors
-    text = adjustSentenceLength(text);                // Step 2: Vary sentence lengths
-    text = aggressiveParaphrase(text);                // Step 3: Aggressive paraphrasing
-    text = addIdiomsAndPhrases(text);                 // Step 4: Add idioms and phrases
+    text = adjustSentenceStructure(text);             // Step 2: Vary sentence structure
+    text = addFillerWords(text);                      // Step 3: Add conversational fillers
+    text = aggressiveParaphrase(text);                // Step 4: Aggressive paraphrasing
+    text = addIdiomsAndPhrases(text);                 // Step 5: Add idioms and phrases
     return text;
 };
 
