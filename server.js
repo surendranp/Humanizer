@@ -13,77 +13,86 @@ app.use(express.static('public'));
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+// Custom idioms and informal phrases
 const idioms = [
-    "A blessing in disguise", "Break the ice", "Hit the nail on the head",
-    "Speak of the devil", "Once in a blue moon", "Bite the bullet",
-    "Better late than never", "Burning the midnight oil", "Spill the beans"
+    "A blessing in disguise",
+    "Break the ice",
+    "Hit the nail on the head",
+    "Speak of the devil",
+    "Once in a blue moon",
+    "Bite the bullet",
+    "Better late than never",
+    "Burning the midnight oil",
+    "Spill the beans",
 ];
 
-// Expanded error injection function with more variety
+// Function to introduce random spelling/grammar errors
 const introduceErrors = (text) => {
     const errors = [
         { pattern: /their/g, replacement: "there" },
         { pattern: /it's/g, replacement: "its" },
         { pattern: /affect/g, replacement: "effect" },
         { pattern: /too/g, replacement: "to" },
-        { pattern: /you're/g, replacement: "your" },
-        { pattern: /definitely/g, replacement: "definately" },
-        { pattern: /separate/g, replacement: "seperate" }
+        { pattern: /lose/g, replacement: "loose" }
     ];
-    
-    // Adding random punctuation shifts
-    text = text.replace(/(\.)/g, (match) => (Math.random() > 0.7 ? ',' : match));
-    
-    return errors.reduce((result, { pattern, replacement }) => {
-        return result.replace(pattern, replacement);
-    }, text);
+    return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
 
-// Sentence variation and structure shuffling
-const shuffleSentenceStructure = (text) => {
-    let sentences = text.split(/[.!?]/).filter(Boolean);  // Break sentences
-    // Randomly shuffle some sentence parts to vary the structure
-    sentences = sentences.map(sentence => {
-        const words = sentence.split(' ');
-        if (Math.random() > 0.5) {
-            words.push(words.shift()); // Shift words randomly
+// Function to add slight conversational filler
+const addFillerWords = (text) => {
+    const fillers = [
+        "you know,", "well,", "basically,", "to be honest,", "like I said,"
+    ];
+    const sentences = text.split('.');
+    return sentences.map(sentence => {
+        if (Math.random() < 0.3) {
+            const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
+            return `${randomFiller} ${sentence}`;
         }
-        return words.join(' ');
-    });
-    return sentences.join('. ') + '.'; // Reassemble with period
+        return sentence;
+    }).join('. ');
 };
 
-// Synonym substitution with slight randomization
-const substituteWords = (text) => {
-    const substitutions = {
-        "important": ["crucial", "vital", "essential"],
-        "difficult": ["tricky", "challenging", "tough"],
-        "think": ["believe", "reckon", "suppose"],
-        "result": ["outcome", "consequence", "effect"],
-        "shows": ["indicates", "reveals", "demonstrates"],
-        "However,": ["Still,", "Nevertheless,", "That being said,"],
-        "Furthermore,": ["Moreover,", "What's more,", "In addition,"]
-    };
-    
-    for (const [key, values] of Object.entries(substitutions)) {
-        const randomChoice = values[Math.floor(Math.random() * values.length)];
-        text = text.replace(new RegExp(`\\b${key}\\b`, 'g'), randomChoice);
-    }
-    
+// Function to randomly merge or split sentences
+const adjustSentenceStructure = (text) => {
+    let sentences = text.split('.');
+    sentences = sentences.map(sentence => {
+        if (Math.random() > 0.5) return sentence + ', ' + sentence;  // Combine sentences randomly
+        if (sentence.length > 15 && Math.random() < 0.5) return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);  // Split long sentences
+        return sentence;
+    });
+    return sentences.join('. ');
+};
+
+// Insert idioms and informal phrases
+const addIdiomsAndPhrases = (text) => {
+    const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
+    return `${text} ${randomIdiom}.`;
+};
+
+// Aggressively paraphrase content with increased variability
+const aggressiveParaphrase = (text) => {
+    return text
+        .replace(/important/g, "vital")
+        .replace(/difficult/g, "tough")
+        .replace(/think/g, "reckon")
+        .replace(/result/g, "consequence")
+        .replace(/shows/g, "demonstrates")
+        .replace(/However,/g, "Still,")
+        .replace(/Furthermore,/g, "Besides that,");
+};
+
+// Stronger humanization logic with idioms, paraphrasing, and errors
+const humanizeTextLocally = (inputText) => {
+    let text = introduceErrors(inputText);            // Step 1: Introduce errors
+    text = adjustSentenceStructure(text);             // Step 2: Vary sentence structure
+    text = addFillerWords(text);                      // Step 3: Add conversational fillers
+    text = aggressiveParaphrase(text);                // Step 4: Aggressive paraphrasing
+    text = addIdiomsAndPhrases(text);                 // Step 5: Add idioms and phrases
     return text;
 };
 
-// Manual layering: Adding extra steps like idioms and style tweaks
-const applyHumanLayer = (text) => {
-    let humanizedText = introduceErrors(text);   // Inject natural human errors
-    humanizedText = shuffleSentenceStructure(humanizedText);  // Shuffle sentence structure
-    humanizedText = substituteWords(humanizedText); // Synonym substitution
-    const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
-    humanizedText += ` ${randomIdiom}.`;  // Add an idiom
-    return humanizedText;
-};
-
-// Refine text with OpenAI for final touch
+// OpenAI API function for final refinements
 const fetchValidatedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -91,19 +100,21 @@ const fetchValidatedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
+    const maxTokens = 2048;
+
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound like natural human speech and bypass AI detectors:\n\n${inputText}`
+                content: `Refine this text to sound more like natural human speech without adding detectable AI-like patterns. Ensure variability and human-like flaws:\n\n${inputText}`
             }
         ],
-        temperature: 0.8,   // Higher randomness
-        max_tokens: 2048,
+        max_tokens: maxTokens,
+        temperature: 0.75,  // More variability
         top_p: 0.85,
-        frequency_penalty: 1.5,
-        presence_penalty: 1.5
+        frequency_penalty: 1.7,  // Encourage more sentence variety
+        presence_penalty: 1.7    // Reduce AI presence in the final output
     };
 
     try {
@@ -123,7 +134,7 @@ app.post('/humanize', async (req, res) => {
     }
 
     try {
-        let humanizedText = applyHumanLayer(inputText);
+        let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
         res.json({ transformedText: finalText });
     } catch (error) {
