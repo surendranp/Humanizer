@@ -13,7 +13,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
 
     try {
-        const response = await fetch(`${baseUrl}/humanize`, {
+        const response = await fetch('/humanize', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -42,4 +42,12 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         alert('Error occurred while humanizing the text. Please try again.');
         document.getElementById('loader').style.display = 'none';
     }
+});
+
+document.getElementById('clearBtn').addEventListener('click', function () {
+    document.getElementById('inputText').value = '';
+    document.getElementById('humanizedText').innerText = '';
+    document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
+    document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
+    document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
 });
