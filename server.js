@@ -13,7 +13,7 @@ app.use(express.static('public'));
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Custom idioms and informal phrases
+// Expanded list of idioms and informal phrases
 const idioms = [
     "A blessing in disguise",
     "Break the ice",
@@ -24,6 +24,9 @@ const idioms = [
     "Better late than never",
     "Burning the midnight oil",
     "Spill the beans",
+    "A stitch in time saves nine",
+    "When pigs fly",
+    "Under the weather",
 ];
 
 // Function to introduce random spelling/grammar errors
@@ -33,7 +36,9 @@ const introduceErrors = (text) => {
         { pattern: /it's/g, replacement: "its" },
         { pattern: /affect/g, replacement: "effect" },
         { pattern: /too/g, replacement: "to" },
-        { pattern: /lose/g, replacement: "loose" }
+        { pattern: /lose/g, replacement: "loose" },
+        { pattern: /your/g, replacement: "you're" },
+        { pattern: /then/g, replacement: "than" },
     ];
     return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
@@ -41,11 +46,11 @@ const introduceErrors = (text) => {
 // Function to add slight conversational filler
 const addFillerWords = (text) => {
     const fillers = [
-        "you know,", "well,", "basically,", "to be honest,", "like I said,"
+        "you know,", "well,", "basically,", "to be honest,", "like I said,", "I guess,", "sort of,"
     ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
-        if (Math.random() < 0.3) {
+        if (Math.random() < 0.35) {
             const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
             return `${randomFiller} ${sentence}`;
         }
@@ -53,46 +58,55 @@ const addFillerWords = (text) => {
     }).join('. ');
 };
 
-// Function to randomly merge or split sentences
+// More aggressive sentence randomization
 const adjustSentenceStructure = (text) => {
     let sentences = text.split('.');
     sentences = sentences.map(sentence => {
-        if (Math.random() > 0.5) return sentence + ', ' + sentence;  // Combine sentences randomly
-        if (sentence.length > 15 && Math.random() < 0.5) return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);  // Split long sentences
+        if (Math.random() > 0.6) {
+            return sentence + '. ' + sentences[Math.floor(Math.random() * sentences.length)];  // Insert random sentences from other parts of the text
+        }
+        if (sentence.length > 15 && Math.random() < 0.5) {
+            return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);  // Split long sentences
+        }
         return sentence;
     });
     return sentences.join('. ');
 };
 
-// Insert idioms and informal phrases
+// Insert idioms and informal phrases at random positions
 const addIdiomsAndPhrases = (text) => {
     const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
-    return `${text} ${randomIdiom}.`;
+    const sentences = text.split('.');
+    const insertIndex = Math.floor(Math.random() * sentences.length);
+    sentences.splice(insertIndex, 0, randomIdiom);
+    return sentences.join('. ');
 };
 
-// Aggressively paraphrase content with increased variability
+// Stronger paraphrasing with more variability
 const aggressiveParaphrase = (text) => {
     return text
-        .replace(/important/g, "vital")
+        .replace(/important/g, "crucial")
         .replace(/difficult/g, "tough")
-        .replace(/think/g, "reckon")
+        .replace(/think/g, "guess")
         .replace(/result/g, "consequence")
-        .replace(/shows/g, "demonstrates")
+        .replace(/shows/g, "indicates")
         .replace(/However,/g, "Still,")
-        .replace(/Furthermore,/g, "Besides that,");
+        .replace(/Furthermore,/g, "Besides that,")
+        .replace(/Moreover,/g, "In addition to that,")
+        .replace(/benefits/g, "upsides");
 };
 
-// Stronger humanization logic with idioms, paraphrasing, and errors
+// Applying all transformations for humanization
 const humanizeTextLocally = (inputText) => {
-    let text = introduceErrors(inputText);            // Step 1: Introduce errors
-    text = adjustSentenceStructure(text);             // Step 2: Vary sentence structure
-    text = addFillerWords(text);                      // Step 3: Add conversational fillers
-    text = aggressiveParaphrase(text);                // Step 4: Aggressive paraphrasing
-    text = addIdiomsAndPhrases(text);                 // Step 5: Add idioms and phrases
+    let text = introduceErrors(inputText);            // Step 1: Introduce random errors
+    text = addFillerWords(text);                      // Step 2: Add conversational fillers
+    text = adjustSentenceStructure(text);             // Step 3: Randomize sentence structure
+    text = aggressiveParaphrase(text);                // Step 4: Aggressively paraphrase content
+    text = addIdiomsAndPhrases(text);                 // Step 5: Insert idioms and phrases
     return text;
 };
 
-// OpenAI API function for final refinements
+// OpenAI API function for final refinements with more randomness
 const fetchValidatedText = async (inputText) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -100,21 +114,19 @@ const fetchValidatedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
-    const maxTokens = 2048;
-
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound more like natural human speech without adding detectable AI-like patterns. Ensure variability and human-like flaws:\n\n${inputText}`
+                content: `Refine this text to sound as if it was written by a human, with randomness, slight imperfections, and informal tone. Ensure it is undetectable by AI content detection tools. Add variability:\n\n${inputText}`
             }
         ],
-        max_tokens: maxTokens,
-        temperature: 0.75,  // More variability
-        top_p: 0.85,
-        frequency_penalty: 1.7,  // Encourage more sentence variety
-        presence_penalty: 1.7    // Reduce AI presence in the final output
+        max_tokens: 2048,
+        temperature: Math.random() * 0.5 + 0.7,  // Vary temperature between 0.7 and 1.2 for more creativity
+        top_p: Math.random() * 0.5 + 0.6,        // Vary top_p for random variability
+        frequency_penalty: 1.5,                  // Encourage variability in words
+        presence_penalty: 1.7                    // Reduce consistent patterns
     };
 
     try {
