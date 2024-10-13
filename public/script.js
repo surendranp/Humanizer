@@ -44,10 +44,18 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 });
 
+// Add event listener for input changes to update word count dynamically
+document.getElementById('inputText').addEventListener('input', function () {
+    const inputText = this.value;
+    const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
+    document.getElementById('wordCount').innerText = `Word Count: ${wordCount}`;
+});
+
 document.getElementById('clearBtn').addEventListener('click', function () {
     document.getElementById('inputText').value = '';
     document.getElementById('humanizedText').innerText = '';
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
+    document.getElementById('wordCount').innerText = 'Word Count: 0'; // Reset the word count
 });
