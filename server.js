@@ -89,7 +89,7 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound more like natural human speech without adding detectable AI-like patterns:\n\n${inputText}`
+                content: `Refine this text to sound more natural human speech without adding detectable AI-like patterns and Bypass various AI Detector :\n\n${inputText}`
             }
         ],
         max_tokens: maxTokens,
