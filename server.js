@@ -33,6 +33,7 @@ const introduceErrors = (text) => {
         { pattern: /it's/g, replacement: "its" },
         { pattern: /affect/g, replacement: "effect" },
         { pattern: /too/g, replacement: "to" },
+        { pattern: /lose/g, replacement: "loose" }
     ];
     return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
@@ -53,16 +54,16 @@ const addIdiomsAndPhrases = (text) => {
     return `${text} ${randomIdiom}.`;
 };
 
-// Aggressively paraphrase content
+// Aggressively paraphrase content with increased variability
 const aggressiveParaphrase = (text) => {
     return text
-        .replace(/important/g, "crucial")
-        .replace(/difficult/g, "tricky")
-        .replace(/think/g, "believe")
-        .replace(/result/g, "outcome")
-        .replace(/shows/g, "indicates")
+        .replace(/important/g, "vital")
+        .replace(/difficult/g, "tough")
+        .replace(/think/g, "reckon")
+        .replace(/result/g, "consequence")
+        .replace(/shows/g, "demonstrates")
         .replace(/However,/g, "Still,")
-        .replace(/Furthermore,/g, "What's more,");
+        .replace(/Furthermore,/g, "Besides that,");
 };
 
 // Stronger humanization logic with idioms, paraphrasing, and errors
@@ -82,21 +83,21 @@ const fetchValidatedText = async (inputText) => {
         'Content-Type': 'application/json',
     };
 
-    const maxTokens = 2048; // Adjust token length based on input
+    const maxTokens = 2048;
 
     const requestData = {
         model: 'gpt-3.5-turbo',
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound more natural human speech without adding detectable AI-like patterns and Bypass various AI Detector :\n\n${inputText}`
+                content: `Refine this text to sound more like natural human speech without adding detectable AI-like patterns. Ensure variability and human-like flaws:\n\n${inputText}`
             }
         ],
         max_tokens: maxTokens,
-        temperature: 0.7,   // Higher randomness for creativity
-        top_p: 0.85,        // More variability
-        frequency_penalty: 1.5,
-        presence_penalty: 1.5
+        temperature: 0.75,  // More variability
+        top_p: 0.85,
+        frequency_penalty: 1.7,  // Encourage more sentence variety
+        presence_penalty: 1.7    // Reduce AI presence in the final output
     };
 
     try {
@@ -124,7 +125,7 @@ app.post('/humanize', async (req, res) => {
         res.status(500).json({ error: 'Failed to humanize text' });
     }
 });
-// Serve the index.html at the root route
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
@@ -132,5 +133,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
-
-
