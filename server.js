@@ -1,8 +1,9 @@
+require('dotenv').config();
+
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -138,6 +139,24 @@ const fetchValidatedText = async (inputText) => {
     }
 };
 
+// Function to calculate AI-generated content percentage
+const calculateAIGeneratedPercentage = (originalText, humanizedText) => {
+    const originalWords = originalText.split(/\s+/);
+    const humanizedWords = humanizedText.split(/\s+/);
+    let unchangedWords = 0;
+
+    // Count how many words remained the same
+    for (let i = 0; i < Math.min(originalWords.length, humanizedWords.length); i++) {
+        if (originalWords[i] === humanizedWords[i]) {
+            unchangedWords++;
+        }
+    }
+
+    // Calculate percentage of AI-generated (unchanged) content
+    const aiGeneratedPercentage = (unchangedWords / originalWords.length) * 100;
+    return aiGeneratedPercentage.toFixed(2); // Return a percentage with 2 decimal places
+};
+
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -148,7 +167,16 @@ app.post('/humanize', async (req, res) => {
     try {
         let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
-        res.json({ transformedText: finalText });
+
+        // Calculate AI-generated and humanized content percentages
+        const aiGeneratedPercentage = calculateAIGeneratedPercentage(inputText, finalText);
+        const humanizedPercentage = (100 - aiGeneratedPercentage).toFixed(2);
+
+        res.json({ 
+            transformedText: finalText,
+            aiGeneratedPercentage,
+            humanizedPercentage
+        });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to humanize text' });
