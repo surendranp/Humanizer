@@ -16,41 +16,32 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // Expanded list of idioms and informal phrases
 const idioms = [
-    "A blessing in disguise",
-    "Break the ice",
-    "Hit the nail on the head",
-    "Speak of the devil",
-    "Once in a blue moon",
-    "Bite the bullet",
-    "Better late than never",
-    "Burning the midnight oil",
-    "Spill the beans",
-    "A stitch in time saves nine",
-    "When pigs fly",
-    "Under the weather",
-    "Piece of cake",           // New idioms
-    "The ball is in your court",
-    "The best of both worlds",
-    "A dime a dozen",
-    "Let the cat out of the bag",
-    "Barking up the wrong tree"
+    "A blessing in disguise", "Break the ice", "Hit the nail on the head", "Speak of the devil", 
+    "Once in a blue moon", "Bite the bullet", "Better late than never", "Burning the midnight oil", 
+    "Spill the beans", "A stitch in time saves nine", "When pigs fly", "Under the weather", 
+    "Piece of cake", "The ball is in your court", "The best of both worlds", "A dime a dozen", 
+    "Let the cat out of the bag", "Barking up the wrong tree", "Costs an arm and a leg", 
+    "Raining cats and dogs", "Burn bridges", "Catch someone red-handed", "Cut to the chase", 
+    "Devil’s advocate", "Fit as a fiddle", "Go down in flames", "It takes two to tango", 
+    "On the ball", "Pulling your leg", "The last straw", "Throw in the towel", 
+    "Actions speak louder than words", "Hit the books", "Jump the gun", "Miss the boat", 
+    "Once bitten, twice shy", "Out of the blue", "Time flies when you’re having fun", 
+    "Through thick and thin", "Turn a blind eye", "Under the weather", "You can’t judge a book by its cover"
 ];
 
 // Function to introduce random spelling/grammar errors
 const introduceErrors = (text) => {
     const errors = [
-        { pattern: /their/g, replacement: "there" },
-        { pattern: /it's/g, replacement: "its" },
-        { pattern: /affect/g, replacement: "effect" },
-        { pattern: /too/g, replacement: "to" },
-        { pattern: /lose/g, replacement: "loose" },
-        { pattern: /your/g, replacement: "you're" },
-        { pattern: /then/g, replacement: "than" },
-        { pattern: /definitely/g, replacement: "definately" },  // New errors
-        { pattern: /separate/g, replacement: "seperate" },
-        { pattern: /occasionally/g, replacement: "occassionally" },
-        { pattern: /received/g, replacement: "recieved" },
-        { pattern: /believe/g, replacement: "beleive" }
+        { pattern: /their/g, replacement: "there" }, { pattern: /it's/g, replacement: "its" }, 
+        { pattern: /affect/g, replacement: "effect" }, { pattern: /too/g, replacement: "to" }, 
+        { pattern: /lose/g, replacement: "loose" }, { pattern: /your/g, replacement: "you're" }, 
+        { pattern: /then/g, replacement: "than" }, { pattern: /definitely/g, replacement: "definately" },  
+        { pattern: /separate/g, replacement: "seperate" }, { pattern: /occasionally/g, replacement: "occassionally" }, 
+        { pattern: /received/g, replacement: "recieved" }, { pattern: /believe/g, replacement: "beleive" },
+        { pattern: /its/g, replacement: "it's" }, { pattern: /accept/g, replacement: "except" }, 
+        { pattern: /advice/g, replacement: "advise" }, { pattern: /allusion/g, replacement: "illusion" }, 
+        { pattern: /compliment/g, replacement: "complement" }, { pattern: /elicit/g, replacement: "illicit" }, 
+        { pattern: /precede/g, replacement: "proceed" }, { pattern: /principal/g, replacement: "principle" },
     ];
     return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
@@ -59,8 +50,10 @@ const introduceErrors = (text) => {
 const addFillerWords = (text) => {
     const fillers = [
        "you know,", "well,", "basically,", "to be honest,", "like I said,", 
-        "I guess,", "sort of,", "actually,", "you see,", "just saying,", // New fillers
-        "I mean,", "kind of,", "right?"
+    "I guess,", "sort of,", "actually,", "you see,", "just saying,", 
+    "I mean,", "kind of,", "right?", "in my opinion,", "at the end of the day,", 
+    "frankly speaking,", "to be fair,", "in a way,", "honestly,", "seriously,", 
+    "as a matter of fact,", "kind of like,", "in reality,", "truth be told,", "believe it or not,"
     ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
