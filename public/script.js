@@ -1,5 +1,6 @@
 const outputs = []; // Array to store generated outputs
 let currentPage = 0; // Track current page
+const outputsPerPage = 1; // Number of outputs per page
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
@@ -10,7 +11,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 
     document.getElementById('loader').style.display = 'block';
-    document.getElementById('humanizedText').value = ''; // Clear previous output
+    document.getElementById('humanizedText').innerText = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
@@ -39,7 +40,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         displayOutput();
 
         // Update output word count and percentages
-        updateWordCount(data.transformedText);
+        const outputWordCount = data.transformedText.trim().split(/\s+/).length;
+        document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
         document.getElementById('aiGeneratedPercentage').innerText = `AI-generated content: ${data.aiGeneratedPercentage}%`;
         document.getElementById('humanizedPercentage').innerText = `Humanized content: ${data.humanizedPercentage}%`;
         document.getElementById('retryBtn').style.display = 'inline';
@@ -56,16 +58,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
 // Display the current output based on the current page
 function displayOutput() {
-    const outputContainer = document.getElementById('humanizedText');
-    const currentOutput = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.';
-    outputContainer.value = currentOutput;
-    updateWordCount(currentOutput); // Update word count when navigating pages
-}
-
-// Update the word count dynamically for outputs
-function updateWordCount(text) {
-    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-    document.getElementById('outputWordCount').innerText = `Output Word Count: ${wordCount}`;
+    const outputContainer = document.getElementById('humanizedText'); // Use the correct text area ID
+    outputContainer.value = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.'; // Set value instead of innerHTML
 }
 
 // Update pagination controls
@@ -95,22 +89,6 @@ document.getElementById('nextPage').addEventListener('click', () => {
         currentPage++;
         displayOutput();
         updatePaginationControls();
-    }
-});
-
-// Copy button functionality with animation
-document.getElementById('copyBtn').addEventListener('click', () => {
-    const outputText = document.getElementById('humanizedText').value;
-    if (outputText.trim()) {
-        navigator.clipboard.writeText(outputText).then(() => {
-            const copyStatus = document.getElementById('copyStatus');
-            copyStatus.style.display = 'inline'; // Show the copied message
-            setTimeout(() => {
-                copyStatus.style.display = 'none'; // Hide after 2 seconds
-            }, 2000);
-        }).catch(err => {
-            console.error('Error copying text: ', err);
-        });
     }
 });
 
