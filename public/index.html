@@ -3,33 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Humanizer</title>
+    <title>Humanize AI Text</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <textarea id="inputText" placeholder="Enter text here"></textarea>
-        <div id="wordCount">Word Count: 0</div>
-        <button id="submitBtn">Submit</button>
+        <h1>Humanize AI Text</h1>
+        
+        <!-- Input Text Area -->
+        <textarea id="inputText" rows="10" cols="50" placeholder="Enter text to humanize..."></textarea>
+        <p id="wordCount">Word Count: 0</p>
+
+        <!-- Submit Button -->
+        <button id="submitBtn">Humanize</button>
+
+        <!-- Loader -->
+        <div id="loader" class="loader" style="display: none;"></div>
+
+        <!-- Output Text Area -->
+        <textarea id="humanizedText" rows="10" cols="50" readonly></textarea>
+
+        <!-- Output Word Count -->
+        <p id="outputWordCount">Output Word Count: 0</p>
+
+        <!-- AI and Humanized Content Percentages -->
+        <p id="aiGeneratedPercentage">AI-generated content: 0%</p>
+        <p id="humanizedPercentage">Humanized content: 0%</p>
+
+        <!-- Copy Button with Animation -->
+        <button id="copyBtn">Copy</button>
+        <span id="copyStatus" style="display: none; color: green;">&#10004; Copied!</span>
+
+        <!-- Retry and Clear Buttons -->
+        <button id="retryBtn" style="display: none;">Retry</button>
         <button id="clearBtn">Clear</button>
 
-        <div class="loader" id="loader" style="display: none;"></div>
-
-        <textarea id="humanizedText" readonly></textarea>
-        <div id="outputWordCount">Output Word Count: 0</div>
-
-        <div id="paginationControls">
-            <button id="prevPage" disabled>Previous</button>
-            <button id="nextPage" disabled>Next</button>
+        <!-- Pagination Controls -->
+        <div id="paginationControls" style="display: none;">
+            <button id="prevPage">Previous</button>
+            <button id="nextPage">Next</button>
         </div>
-
-        <button id="copyBtn">Copy</button>
-        <div id="copyMessage" style="display: none;">✔ Copied!</div>
-
-        <div id="aiGeneratedPercentage">AI-generated content: 0%</div>
-        <div id="humanizedPercentage">Humanized content: 0%</div>
     </div>
 
+    <!-- JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
