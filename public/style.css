@@ -27,6 +27,23 @@ body {
     margin: 20px auto; /* Center the loader */
 }
 
+#copyMessage {
+    color: green;
+    font-weight: bold;
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+#copyMessage.show {
+    opacity: 1;
+}
+
+#copyMessage.hide {
+    opacity: 0;
+}
+
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
