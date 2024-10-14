@@ -158,22 +158,6 @@ const fetchValidatedText = async (inputText) => {
     }
 };
 
-// Function to calculate AI-generated content percentage
-const calculateAIGeneratedPercentage = (originalText, humanizedText) => {
-    const originalWords = originalText.split(/\s+/);
-    const humanizedWords = humanizedText.split(/\s+/);
-    let unchangedWords = 0;
-
-    for (let i = 0; i < Math.min(originalWords.length, humanizedWords.length); i++) {
-        if (originalWords[i] === humanizedWords[i]) {
-            unchangedWords++;
-        }
-    }
-
-    const aiGeneratedPercentage = (unchangedWords / originalWords.length) * 100;
-    return aiGeneratedPercentage.toFixed(2);
-};
-
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -185,13 +169,8 @@ app.post('/humanize', async (req, res) => {
         let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
 
-        const aiGeneratedPercentage = calculateAIGeneratedPercentage(inputText, finalText);
-        const humanizedPercentage = (100 - aiGeneratedPercentage).toFixed(2);
-
         res.json({ 
-            transformedText: finalText,
-            aiGeneratedPercentage,
-            humanizedPercentage
+            transformedText: finalText
         });
     } catch (error) {
         console.error('Error:', error);
