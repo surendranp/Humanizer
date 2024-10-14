@@ -11,7 +11,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 
     document.getElementById('loader').style.display = 'block';
-    document.getElementById('humanizedText').innerText = '';
+    document.getElementById('humanizedText').innerText = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
@@ -58,8 +58,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
 // Display the current output based on the current page
 function displayOutput() {
-    const outputContainer = document.getElementById('outputContainer');
-    outputContainer.innerHTML = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.';
+    const outputContainer = document.getElementById('humanizedText'); // Use the correct text area ID
+    outputContainer.value = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.'; // Set value instead of innerHTML
 }
 
 // Update pagination controls
@@ -101,7 +101,7 @@ document.getElementById('inputText').addEventListener('input', function () {
 
 document.getElementById('clearBtn').addEventListener('click', function () {
     document.getElementById('inputText').value = '';
-    document.getElementById('humanizedText').innerText = '';
+    document.getElementById('humanizedText').value = ''; // Clear the text area value
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
@@ -110,6 +110,5 @@ document.getElementById('clearBtn').addEventListener('click', function () {
     // Clear stored outputs
     outputs.length = 0;
     currentPage = 0; // Reset page to 0
-    document.getElementById('outputContainer').innerHTML = 'No outputs generated yet.';
-    document.getElementById('paginationControls').style.display = 'none'; // Hide pagination
+    document.getElementById('paginationControls').style.display = 'none'; // Hide pagination controls
 });
