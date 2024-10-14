@@ -1,8 +1,9 @@
+require('dotenv').config();
+
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,6 +28,12 @@ const idioms = [
     "A stitch in time saves nine",
     "When pigs fly",
     "Under the weather",
+    "Piece of cake",           // New idioms
+    "The ball is in your court",
+    "The best of both worlds",
+    "A dime a dozen",
+    "Let the cat out of the bag",
+    "Barking up the wrong tree"
 ];
 
 // Function to introduce random spelling/grammar errors
@@ -39,6 +46,11 @@ const introduceErrors = (text) => {
         { pattern: /lose/g, replacement: "loose" },
         { pattern: /your/g, replacement: "you're" },
         { pattern: /then/g, replacement: "than" },
+        { pattern: /definitely/g, replacement: "definately" },  // New errors
+        { pattern: /separate/g, replacement: "seperate" },
+        { pattern: /occasionally/g, replacement: "occassionally" },
+        { pattern: /received/g, replacement: "recieved" },
+        { pattern: /believe/g, replacement: "beleive" }
     ];
     return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
@@ -46,7 +58,9 @@ const introduceErrors = (text) => {
 // Function to add slight conversational filler
 const addFillerWords = (text) => {
     const fillers = [
-        "you know,", "well,", "basically,", "to be honest,", "like I said,", "I guess,", "sort of,"
+       "you know,", "well,", "basically,", "to be honest,", "like I said,", 
+        "I guess,", "sort of,", "actually,", "you see,", "just saying,", // New fillers
+        "I mean,", "kind of,", "right?"
     ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
@@ -86,14 +100,21 @@ const addIdiomsAndPhrases = (text) => {
 const aggressiveParaphrase = (text) => {
     return text
         .replace(/important/g, "crucial")
-        .replace(/difficult/g, "tough")
-        .replace(/think/g, "guess")
-        .replace(/result/g, "consequence")
-        .replace(/shows/g, "indicates")
-        .replace(/However,/g, "Still,")
-        .replace(/Furthermore,/g, "Besides that,")
-        .replace(/Moreover,/g, "In addition to that,")
-        .replace(/benefits/g, "upsides");
+        .replace(/difficult/g, "challenging")
+        .replace(/think/g, "believe")
+        .replace(/result/g, "outcome")
+        .replace(/shows/g, "demonstrates")
+        .replace(/However,/g, "Nonetheless,")
+        .replace(/Furthermore,/g, "Moreover,")
+        .replace(/Moreover,/g, "In addition,")
+        .replace(/benefits/g, "advantages")
+        .replace(/utilize/g, "use")
+        .replace(/obtain/g, "get")
+        .replace(/start/g, "begin")
+        .replace(/end/g, "conclude")
+        .replace(/suggest/g, "propose")
+        .replace(/happy/g, "content")
+        .replace(/sad/g, "unhappy");
 };
 
 // Applying all transformations for humanization
@@ -138,6 +159,24 @@ const fetchValidatedText = async (inputText) => {
     }
 };
 
+// Function to calculate AI-generated content percentage
+const calculateAIGeneratedPercentage = (originalText, humanizedText) => {
+    const originalWords = originalText.split(/\s+/);
+    const humanizedWords = humanizedText.split(/\s+/);
+    let unchangedWords = 0;
+
+    // Count how many words remained the same
+    for (let i = 0; i < Math.min(originalWords.length, humanizedWords.length); i++) {
+        if (originalWords[i] === humanizedWords[i]) {
+            unchangedWords++;
+        }
+    }
+
+    // Calculate percentage of AI-generated (unchanged) content
+    const aiGeneratedPercentage = (unchangedWords / originalWords.length) * 100;
+    return aiGeneratedPercentage.toFixed(2); // Return a percentage with 2 decimal places
+};
+
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -148,7 +187,16 @@ app.post('/humanize', async (req, res) => {
     try {
         let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
-        res.json({ transformedText: finalText });
+
+        // Calculate AI-generated and humanized content percentages
+        const aiGeneratedPercentage = calculateAIGeneratedPercentage(inputText, finalText);
+        const humanizedPercentage = (100 - aiGeneratedPercentage).toFixed(2);
+
+        res.json({ 
+            transformedText: finalText,
+            aiGeneratedPercentage,
+            humanizedPercentage
+        });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to humanize text' });
