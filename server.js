@@ -1,10 +1,8 @@
-require('dotenv').config();
-require('dotenv').config();
-
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,67 +15,39 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // Expanded list of idioms and informal phrases
 const idioms = [
-    "A blessing in disguise", "Break the ice", "Hit the nail on the head", "Speak of the devil", 
-    "Once in a blue moon", "Bite the bullet", "Better late than never", "Burning the midnight oil", 
-    "Spill the beans", "A stitch in time saves nine", "When pigs fly", "Under the weather", 
-    "Piece of cake", "The ball is in your court", "The best of both worlds", "A dime a dozen", 
-    "Let the cat out of the bag", "Barking up the wrong tree", "Costs an arm and a leg", 
-    "Raining cats and dogs", "Burn bridges", "Catch someone red-handed", "Cut to the chase", 
-    "Devil’s advocate", "Fit as a fiddle", "Go down in flames", "It takes two to tango", 
-    "On the ball", "Pulling your leg", "The last straw", "Throw in the towel", 
-    "Actions speak louder than words", "Hit the books", "Jump the gun", "Miss the boat", 
-    "Once bitten, twice shy", "Out of the blue", "Time flies when you’re having fun", 
-    "Through thick and thin", "Turn a blind eye", "You can’t judge a book by its cover"
-    // Add more as needed
-];
-
-// Expanded list of spelling/grammar errors
-const spellingGrammarErrors = [
-    { pattern: /their/g, replacement: "there" }, { pattern: /it's/g, replacement: "its" }, 
-    { pattern: /affect/g, replacement: "effect" }, { pattern: /too/g, replacement: "to" }, 
-    { pattern: /lose/g, replacement: "loose" }, { pattern: /your/g, replacement: "you're" }, 
-    { pattern: /then/g, replacement: "than" }, { pattern: /definitely/g, replacement: "definately" },  
-    { pattern: /separate/g, replacement: "seperate" }, { pattern: /occasionally/g, replacement: "occassionally" }, 
-    { pattern: /received/g, replacement: "recieved" }, { pattern: /believe/g, replacement: "beleive" },
-    { pattern: /its/g, replacement: "it's" }, { pattern: /accept/g, replacement: "except" }, 
-    { pattern: /advice/g, replacement: "advise" }, { pattern: /allusion/g, replacement: "illusion" }, 
-    { pattern: /compliment/g, replacement: "complement" }, { pattern: /elicit/g, replacement: "illicit" }, 
-    { pattern: /precede/g, replacement: "proceed" }, { pattern: /principal/g, replacement: "principle" },
-    // Add more as needed
-];
-
-// Expanded list of conversational fillers
-const fillers = [
-    "you know,", "well,", "basically,", "to be honest,", "like I said,", 
-    "I guess,", "sort of,", "actually,", "you see,", "just saying,", 
-    "I mean,", "kind of,", "right?", "in my opinion,", "at the end of the day,", 
-    "frankly speaking,", "to be fair,", "in a way,", "honestly,", "seriously,", 
-    "as a matter of fact,", "kind of like,", "in reality,", "truth be told,", "believe it or not,"
-    // Add more as needed
-];
-
-// Expanded list of paraphrasing
-const paraphrases = [
-    { pattern: /important/g, replacement: "crucial" }, { pattern: /difficult/g, replacement: "challenging" }, 
-    { pattern: /think/g, replacement: "believe" }, { pattern: /result/g, replacement: "outcome" }, 
-    { pattern: /shows/g, replacement: "demonstrates" }, { pattern: /However,/g, replacement: "Nonetheless," }, 
-    { pattern: /Furthermore,/g, replacement: "Moreover," }, { pattern: /Moreover,/g, replacement: "In addition," }, 
-    { pattern: /benefits/g, replacement: "advantages" }, { pattern: /utilize/g, replacement: "use" }, 
-    { pattern: /obtain/g, replacement: "get" }, { pattern: /start/g, replacement: "begin" }, 
-    { pattern: /end/g, replacement: "conclude" }, { pattern: /suggest/g, replacement: "propose" }, 
-    { pattern: /happy/g, replacement: "content" }, { pattern: /sad/g, replacement: "unhappy" },
-    { pattern: /quickly/g, replacement: "rapidly" }, { pattern: /good/g, replacement: "excellent" }, 
-    { pattern: /bad/g, replacement: "poor" }, { pattern: /big/g, replacement: "huge" },
-    // Add more as needed
+    "A blessing in disguise",
+    "Break the ice",
+    "Hit the nail on the head",
+    "Speak of the devil",
+    "Once in a blue moon",
+    "Bite the bullet",
+    "Better late than never",
+    "Burning the midnight oil",
+    "Spill the beans",
+    "A stitch in time saves nine",
+    "When pigs fly",
+    "Under the weather",
 ];
 
 // Function to introduce random spelling/grammar errors
 const introduceErrors = (text) => {
-    return spellingGrammarErrors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
+    const errors = [
+        { pattern: /their/g, replacement: "there" },
+        { pattern: /it's/g, replacement: "its" },
+        { pattern: /affect/g, replacement: "effect" },
+        { pattern: /too/g, replacement: "to" },
+        { pattern: /lose/g, replacement: "loose" },
+        { pattern: /your/g, replacement: "you're" },
+        { pattern: /then/g, replacement: "than" },
+    ];
+    return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
 };
 
 // Function to add slight conversational filler
 const addFillerWords = (text) => {
+    const fillers = [
+        "you know,", "well,", "basically,", "to be honest,", "like I said,", "I guess,", "sort of,"
+    ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
         if (Math.random() < 0.35) {
@@ -93,10 +63,10 @@ const adjustSentenceStructure = (text) => {
     let sentences = text.split('.');
     sentences = sentences.map(sentence => {
         if (Math.random() > 0.6) {
-            return sentence + '. ' + sentences[Math.floor(Math.random() * sentences.length)];
+            return sentence + '. ' + sentences[Math.floor(Math.random() * sentences.length)];  // Insert random sentences from other parts of the text
         }
         if (sentence.length > 15 && Math.random() < 0.5) {
-            return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);
+            return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);  // Split long sentences
         }
         return sentence;
     });
@@ -114,16 +84,25 @@ const addIdiomsAndPhrases = (text) => {
 
 // Stronger paraphrasing with more variability
 const aggressiveParaphrase = (text) => {
-    return paraphrases.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
+    return text
+        .replace(/important/g, "crucial")
+        .replace(/difficult/g, "tough")
+        .replace(/think/g, "guess")
+        .replace(/result/g, "consequence")
+        .replace(/shows/g, "indicates")
+        .replace(/However,/g, "Still,")
+        .replace(/Furthermore,/g, "Besides that,")
+        .replace(/Moreover,/g, "In addition to that,")
+        .replace(/benefits/g, "upsides");
 };
 
 // Applying all transformations for humanization
 const humanizeTextLocally = (inputText) => {
-    let text = introduceErrors(inputText);
-    text = addFillerWords(text);
-    text = adjustSentenceStructure(text);
-    text = aggressiveParaphrase(text);
-    text = addIdiomsAndPhrases(text);
+    let text = introduceErrors(inputText);            // Step 1: Introduce random errors
+    text = addFillerWords(text);                      // Step 2: Add conversational fillers
+    text = adjustSentenceStructure(text);             // Step 3: Randomize sentence structure
+    text = aggressiveParaphrase(text);                // Step 4: Aggressively paraphrase content
+    text = addIdiomsAndPhrases(text);                 // Step 5: Insert idioms and phrases
     return text;
 };
 
@@ -144,10 +123,10 @@ const fetchValidatedText = async (inputText) => {
             }
         ],
         max_tokens: 2048,
-        temperature: Math.random() * 0.5 + 0.7,
-        top_p: Math.min(Math.random() * 0.4 + 0.6, 1),
-        frequency_penalty: 1.5,
-        presence_penalty: 1.7
+        temperature: Math.random() * 0.5 + 0.7,  // Vary temperature between 0.7 and 1.2 for more creativity
+        top_p: Math.min(Math.random() * 0.4 + 0.6, 1),  // Corrected: Ensure top_p never exceeds 1
+        frequency_penalty: 1.5,                  // Encourage variability in words
+        presence_penalty: 1.7                    // Reduce consistent patterns
     };
 
     try {
@@ -169,19 +148,17 @@ app.post('/humanize', async (req, res) => {
     try {
         let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
-
-        res.json({ 
-            transformedText: finalText
-        });
+        res.json({ transformedText: finalText });
     } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({ error: 'An error occurred while processing the text' });
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Failed to humanize text' });
     }
 });
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running on http://localhost:${port}`);
 });
