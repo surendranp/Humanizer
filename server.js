@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('dotenv').config();
 
 const express = require('express');
 const axios = require('axios');
@@ -26,7 +27,7 @@ const idioms = [
     "On the ball", "Pulling your leg", "The last straw", "Throw in the towel", 
     "Actions speak louder than words", "Hit the books", "Jump the gun", "Miss the boat", 
     "Once bitten, twice shy", "Out of the blue", "Time flies when you’re having fun", 
-    "Through thick and thin", "Turn a blind eye", "Under the weather", "You can’t judge a book by its cover"
+    "Through thick and thin", "Turn a blind eye", "You can’t judge a book by its cover"
     // Add more as needed
 ];
 
@@ -173,15 +174,14 @@ app.post('/humanize', async (req, res) => {
             transformedText: finalText
         });
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Failed to humanize text' });
+        console.error('Error:', error.message);
+        res.status(500).json({ error: 'An error occurred while processing the text' });
     }
 });
-
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server is running on port ${port}`);
 });
