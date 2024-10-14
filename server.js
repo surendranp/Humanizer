@@ -26,7 +26,7 @@ const idioms = [
     "On the ball", "Pulling your leg", "The last straw", "Throw in the towel", 
     "Actions speak louder than words", "Hit the books", "Jump the gun", "Miss the boat", 
     "Once bitten, twice shy", "Out of the blue", "Time flies when you’re having fun", 
-    "Through thick and thin", "Turn a blind eye", "You can’t judge a book by its cover"
+    "Through thick and thin", "Turn a blind eye", "Under the weather", "You can’t judge a book by its cover"
 ];
 
 // Function to introduce random spelling/grammar errors
@@ -49,11 +49,11 @@ const introduceErrors = (text) => {
 // Function to add slight conversational filler
 const addFillerWords = (text) => {
     const fillers = [
-        "you know,", "well,", "basically,", "to be honest,", "like I said,", 
-        "I guess,", "sort of,", "actually,", "you see,", "just saying,", 
-        "I mean,", "kind of,", "right?", "in my opinion,", "at the end of the day,", 
-        "frankly speaking,", "to be fair,", "in a way,", "honestly,", "seriously,", 
-        "as a matter of fact,", "kind of like,", "in reality,", "truth be told,", "believe it or not,"
+       "you know,", "well,", "basically,", "to be honest,", "like I said,", 
+       "I guess,", "sort of,", "actually,", "you see,", "just saying,", 
+       "I mean,", "kind of,", "right?", "in my opinion,", "at the end of the day,", 
+       "frankly speaking,", "to be fair,", "in a way,", "honestly,", "seriously,", 
+       "as a matter of fact,", "kind of like,", "in reality,", "truth be told,", "believe it or not,"
     ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
@@ -91,125 +91,118 @@ const addIdiomsAndPhrases = (text) => {
 
 // Stronger paraphrasing with more variability
 const aggressiveParaphrase = (text) => {
-    const paraphrases = [
-        { pattern: /important/g, replacement: "crucial" },
-        { pattern: /difficult/g, replacement: "challenging" },
-        { pattern: /think/g, replacement: "believe" },
-        { pattern: /result/g, replacement: "outcome" },
-        { pattern: /shows/g, replacement: "demonstrates" },
-        { pattern: /However,/g, replacement: "Nonetheless," },
-        { pattern: /Furthermore,/g, replacement: "Moreover," },
-        { pattern: /benefits/g, replacement: "advantages" },
-        { pattern: /utilize/g, replacement: "use" },
-        { pattern: /obtain/g, replacement: "get" },
-        { pattern: /start/g, replacement: "begin" },
-        { pattern: /end/g, replacement: "conclude" },
-        { pattern: /suggest/g, replacement: "propose" },
-        { pattern: /happy/g, replacement: "content" },
-        { pattern: /sad/g, replacement: "unhappy" },
-        { pattern: /quickly/g, replacement: "rapidly" },
-        { pattern: /good/g, replacement: "excellent" },
-        { pattern: /bad/g, replacement: "poor" },
-        { pattern: /big/g, replacement: "huge" },
-        { pattern: /small/g, replacement: "tiny" },
-        { pattern: /angry/g, replacement: "furious" },
-        { pattern: /silly/g, replacement: "foolish" },
-        { pattern: /help/g, replacement: "assist" },
-        { pattern: /try/g, replacement: "attempt" },
-        { pattern: /ask/g, replacement: "inquire" },
-        { pattern: /buy/g, replacement: "purchase" },
-        { pattern: /cheap/g, replacement: "inexpensive" },
-        { pattern: /easy/g, replacement: "simple" },
-        { pattern: /hard/g, replacement: "difficult" },
-        { pattern: /happy/g, replacement: "joyful" },
-        { pattern: /important/g, replacement: "significant" },
-        { pattern: /listen/g, replacement: "hear" },
-        { pattern: /see/g, replacement: "observe" },
-        { pattern: /make/g, replacement: "create" },
-        { pattern: /get/g, replacement: "acquire" },
-        { pattern: /finish/g, replacement: "complete" },
-        { pattern: /show/g, replacement: "exhibit" },
-        { pattern: /find/g, replacement: "discover" },
-        { pattern: /think about/g, replacement: "consider" },
-        { pattern: /spend/g, replacement: "expend" },
-        { pattern: /need/g, replacement: "require" },
-        { pattern: /want/g, replacement: "desire" },
-        { pattern: /try to/g, replacement: "attempt to" },
-        { pattern: /believe in/g, replacement: "have faith in" },
-        { pattern: /talk about/g, replacement: "discuss" },
-        { pattern: /tell/g, replacement: "inform" },
-        { pattern: /go/g, replacement: "proceed" },
-        { pattern: /come/g, replacement: "arrive" },
-        { pattern: /work/g, replacement: "function" },
-        { pattern: /run/g, replacement: "operate" },
-        { pattern: /need/g, replacement: "necessitate" },
-        { pattern: /wait/g, replacement: "pause" },
-        { pattern: /ask for/g, replacement: "request" },
-        { pattern: /call/g, replacement: "contact" },
-        { pattern: /start/g, replacement: "initiate" },
-        { pattern: /show/g, replacement: "demonstrate" },
-        { pattern: /use/g, replacement: "utilize" },
-        { pattern: /say/g, replacement: "state" },
-        { pattern: /feel/g, replacement: "experience" },
-        { pattern: /believe/g, replacement: "think" },
-        { pattern: /move/g, replacement: "shift" },
-        { pattern: /try/g, replacement: "endeavor" },
-        { pattern: /walk/g, replacement: "stroll" },
-        { pattern: /eat/g, replacement: "consume" },
-        { pattern: /drink/g, replacement: "consume" },
-        { pattern: /think about/g, replacement: "reflect on" },
-        { pattern: /speak/g, replacement: "communicate" },
-        { pattern: /explain/g, replacement: "clarify" },
-        { pattern: /create/g, replacement: "produce" },
-        { pattern: /watch/g, replacement: "view" },
-        { pattern: /like/g, replacement: "enjoy" },
-        { pattern: /dislike/g, replacement: "detest" },
-        { pattern: /believe/g, replacement: "accept" },
-        { pattern: /want/g, replacement: "wish for" },
-        { pattern: /need/g, replacement: "want" },
-        { pattern: /hope/g, replacement: "aspire" },
-        { pattern: /wonder/g, replacement: "question" },
-        { pattern: /argue/g, replacement: "debate" },
-        { pattern: /achieve/g, replacement: "attain" },
-        { pattern: /provide/g, replacement: "supply" },
-        { pattern: /avoid/g, replacement: "prevent" },
-        { pattern: /discover/g, replacement: "uncover" },
-        { pattern: /persuade/g, replacement: "convince" },
-        { pattern: /conclude/g, replacement: "finish" },
-        { pattern: /enjoy/g, replacement: "appreciate" },
-        { pattern: /succeed/g, replacement: "triumph" },
-        { pattern: /maintain/g, replacement: "preserve" },
-        { pattern: /develop/g, replacement: "cultivate" },
-        { pattern: /determine/g, replacement: "decide" },
-        { pattern: /record/g, replacement: "document" },
-        { pattern: /request/g, replacement: "solicit" },
-        { pattern: /compete/g, replacement: "vie" },
-        { pattern: /suffer/g, replacement: "endure" },
-        { pattern: /share/g, replacement: "distribute" },
-        { pattern: /improve/g, replacement: "enhance" },
-        { pattern: /calculate/g, replacement: "compute" },
-        { pattern: /examine/g, replacement: "analyze" },
-        { pattern: /decide/g, replacement: "determine" },
-        { pattern: /celebrate/g, replacement: "commemorate" },
-        { pattern: /advance/g, replacement: "progress" },
-        { pattern: /limit/g, replacement: "restrict" },
-        { pattern: /attend/g, replacement: "participate" },
-        { pattern: /contribute/g, replacement: "donate" },
-        { pattern: /influence/g, replacement: "sway" },
-        { pattern: /transform/g, replacement: "change" },
-        { pattern: /educate/g, replacement: "teach" },
-        { pattern: /question/g, replacement: "interrogate" },
-        { pattern: /choose/g, replacement: "select" },
-        { pattern: /include/g, replacement: "incorporate" },
-        { pattern: /analyze/g, replacement: "examine" },
-        { pattern: /decide/g, replacement: "choose" },
-    ];
-
-    for (const { pattern, replacement } of paraphrases) {
-        text = text.replace(pattern, replacement);
-    }
-
-    return text;
+    return text
+        .replace(/important/g, "crucial")
+        .replace(/difficult/g, "challenging")
+        .replace(/think/g, "believe")
+        .replace(/result/g, "outcome")
+        .replace(/shows/g, "demonstrates")
+        .replace(/However,/g, "Nonetheless,")
+        .replace(/Furthermore,/g, "Moreover,")
+        .replace(/Moreover,/g, "In addition,")
+        .replace(/benefits/g, "advantages")
+        .replace(/utilize/g, "use")
+        .replace(/obtain/g, "get")
+        .replace(/start/g, "begin")
+        .replace(/end/g, "conclude")
+        .replace(/suggest/g, "propose")
+        .replace(/happy/g, "content")
+        .replace(/sad/g, "unhappy")
+        .replace(/achieve/g, "accomplish")
+        .replace(/assist/g, "help")
+        .replace(/challenge/g, "dare")
+        .replace(/consider/g, "think about")
+        .replace(/create/g, "make")
+        .replace(/decide/g, "choose")
+        .replace(/discover/g, "find out")
+        .replace(/discuss/g, "talk about")
+        .replace(/experience/g, "go through")
+        .replace(/explain/g, "clarify")
+        .replace(/explore/g, "investigate")
+        .replace(/find/g, "locate")
+        .replace(/follow/g, "pursue")
+        .replace(/improve/g, "enhance")
+        .replace(/include/g, "consist of")
+        .replace(/influence/g, "affect")
+        .replace(/inquire/g, "ask about")
+        .replace(/manage/g, "handle")
+        .replace(/maintain/g, "keep up")
+        .replace(/notice/g, "observe")
+        .replace(/prepare/g, "get ready")
+        .replace(/present/g, "show")
+        .replace(/produce/g, "generate")
+        .replace(/provide/g, "supply")
+        .replace(/realize/g, "understand")
+        .replace(/recognize/g, "identify")
+        .replace(/recommend/g, "suggest")
+        .replace(/remind/g, "alert")
+        .replace(/resolve/g, "settle")
+        .replace(/return/g, "come back")
+        .replace(/select/g, "choose")
+        .replace(/support/g, "back up")
+        .replace(/use/g, "employ")
+        .replace(/verify/g, "confirm")
+        .replace(/watch/g, "observe")
+        .replace(/work/g, "labor")
+        .replace(/create/g, "develop")
+        .replace(/need/g, "require")
+        .replace(/want/g, "desire")
+        .replace(/achieve/g, "reach")
+        .replace(/establish/g, "set up")
+        .replace(/consider/g, "take into account")
+        .replace(/analyze/g, "examine")
+        .replace(/evaluate/g, "assess")
+        .replace(/improve/g, "refine")
+        .replace(/show/g, "display")
+        .replace(/help/g, "assist")
+        .replace(/clarify/g, "explain clearly")
+        .replace(/communicate/g, "convey")
+        .replace(/decrease/g, "reduce")
+        .replace(/determine/g, "decide")
+        .replace(/examine/g, "inspect")
+        .replace(/introduce/g, "present")
+        .replace(/persuade/g, "convince")
+        .replace(/propose/g, "suggest")
+        .replace(/reduce/g, "lessen")
+        .replace(/solve/g, "resolve")
+        .replace(/test/g, "trial")
+        .replace(/wonder/g, "ponder")
+        .replace(/begin/g, "commence")
+        .replace(/celebrate/g, "commemorate")
+        .replace(/understand/g, "comprehend")
+        .replace(/conclude/g, "finish")
+        .replace(/confirm/g, "verify")
+        .replace(/discuss/g, "converse")
+        .replace(/emphasize/g, "stress")
+        .replace(/indicate/g, "point out")
+        .replace(/maintain/g, "sustain")
+        .replace(/observe/g, "witness")
+        .replace(/predict/g, "foresee")
+        .replace(/recall/g, "remember")
+        .replace(/reveal/g, "disclose")
+        .replace(/respond/g, "reply")
+        .replace(/succeed/g, "thrive")
+        .replace(/transform/g, "change")
+        .replace(/travel/g, "journey")
+        .replace(/treat/g, "handle")
+        .replace(/utilize/g, "make use of")
+        .replace(/visit/g, "stop by")
+        .replace(/express/g, "convey")
+        .replace(/generate/g, "create")
+        .replace(/employ/g, "use")
+        .replace(/seek/g, "look for")
+        .replace(/converse/g, "talk")
+        .replace(/disclose/g, "reveal")
+        .replace(/fulfill/g, "meet")
+        .replace(/guide/g, "lead")
+        .replace(/launch/g, "initiate")
+        .replace(/negotiate/g, "bargain")
+        .replace(/overcome/g, "surmount")
+        .replace(/participate/g, "take part")
+        .replace(/reform/g, "revise")
+        .replace(/structure/g, "organize")
+        .replace(/advance/g, "progress")
+        .replace(/enforce/g, "implement");
 };
 
 // Applying all transformations for humanization
@@ -254,6 +247,9 @@ const fetchValidatedText = async (inputText) => {
     }
 };
 
+// Function to calculate AI-generated content percentage
+// Removed since the project only provides humanized content
+
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -265,8 +261,10 @@ app.post('/humanize', async (req, res) => {
         let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
 
+        // Removed AI-generated percentage calculation
+
         res.json({ 
-            transformedText: finalText,
+            transformedText: finalText
         });
     } catch (error) {
         console.error('Error:', error);
