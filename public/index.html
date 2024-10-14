@@ -23,6 +23,10 @@
                 <p>Humanized Text:</p>
                 <textarea id="humanizedText" class="form-control" readonly rows="10"></textarea>
                 <p id="outputWordCount" class="mt-2">Output Word Count: 0</p>
+                <div id="paginationControls" class="d-flex justify-content-between mt-2" style="display:none;">
+                    <button id="prevPage" class="btn btn-secondary" disabled>Previous</button>
+                    <button id="nextPage" class="btn btn-secondary">Next</button>
+                </div>
                 <p id="aiGeneratedPercentage" class="mt-2">AI-generated content: 0%</p>
                 <p id="humanizedPercentage" class="mt-2">Humanized content: 0%</p>
                 <div class="loader" id="loader" style="display:none;"></div>
@@ -30,7 +34,7 @@
         </div>
         
         <!-- New Section for Paginated Outputs -->
-        <div class="row mt-4">
+        <!-- <div class="row mt-4">
             <div class="col-md-12">
                 <h3>Generated Outputs</h3>
                 <div id="outputContainer" class="border p-3" style="min-height: 100px;">
@@ -41,7 +45,7 @@
                     <button id="nextPage" class="btn btn-secondary">Next</button>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
     <script src="script.js"></script>
 </body>
