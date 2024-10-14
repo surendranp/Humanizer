@@ -133,11 +133,12 @@ document.getElementById('copyBtn').addEventListener('click', function () {
 
     // Show copy message
     const copyMessage = document.getElementById('copyMessage');
-    copyMessage.innerText = 'Copied!';
-    copyMessage.style.display = 'inline'; 
+    copyMessage.classList.remove('hide');
+    copyMessage.classList.add('show');
 
-    // Animate tick symbol and hide the message after 1.5 seconds
+    // Hide the message after 1.5 seconds
     setTimeout(() => {
-        copyMessage.style.display = 'none';
+        copyMessage.classList.remove('show');
+        copyMessage.classList.add('hide');
     }, 1500);
 });

@@ -36,7 +36,7 @@ body {
     font-weight: bold;
     margin-left: 10px;
     opacity: 0;
-    transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-in-out;
 }
 
 #copyMessage.show {
@@ -45,4 +45,5 @@ body {
 
 #copyMessage.hide {
     opacity: 0;
+    transition: opacity 0.5s ease-in-out;
 }
