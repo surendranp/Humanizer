@@ -13,7 +13,7 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 1500px; /* Adjusted width for more space */
+    max-width: 800px;
     text-align: center;
 }
 
@@ -24,27 +24,51 @@ body {
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;
-    margin: 20px auto; /* Center the loader */
+    margin: 20px auto;
 }
-
-#copyMessage {
-    color: green;
-    font-weight: bold;
-    margin-left: 10px;
-    opacity: 0;
-    transition: opacity 0.5s ease-out;
-}
-
-#copyMessage.show {
-    opacity: 1;
-}
-
-#copyMessage.hide {
-    opacity: 0;
-}
-
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+}
+
+#paginationControls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#copyStatus {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+ 
