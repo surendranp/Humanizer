@@ -4,36 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Humanizer</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container"> 
-        <h1 class="text-center mb-4">AI Text Humanizer</h1>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <p>Input Text:</p>
-                <textarea id="inputText" class="form-control" rows="10" placeholder="Enter AI-generated text here..."></textarea>
-                <p id="wordCount" class="mt-2">Word Count: 0</p>
-                <button id="submitBtn" class="btn btn-primary mt-2">Humanize Text</button>
-                <button id="retryBtn" class="btn btn-warning mt-2" style="display:none;">Retry</button>
-                <button id="clearBtn" class="btn btn-danger mt-2">Clear</button>
-            </div>
-            <div class="col-md-6 mb-3">
-                <p>Humanized Text:</p>
-                <textarea id="humanizedText" class="form-control" readonly rows="10"></textarea>
-                <p id="outputWordCount" class="mt-2">Output Word Count: 0</p>
-                <div id="paginationControls" class="d-flex justify-content-between mt-2" style="display:none;">
-                    <button id="prevPage" class="btn btn-secondary" disabled>Previous</button>
-                    <button id="nextPage" class="btn btn-secondary">Next</button>
-                </div>
-                <p id="aiGeneratedPercentage" class="mt-2">AI-generated content: 0%</p>
-                <p id="humanizedPercentage" class="mt-2">Humanized content: 0%</p>
-                <div class="loader" id="loader" style="display:none;"></div>
-            </div>
+    <div class="container">
+        <textarea id="inputText" placeholder="Enter text here"></textarea>
+        <div id="wordCount">Word Count: 0</div>
+        <button id="submitBtn">Submit</button>
+        <button id="clearBtn">Clear</button>
+
+        <div class="loader" id="loader" style="display: none;"></div>
+
+        <textarea id="humanizedText" readonly></textarea>
+        <div id="outputWordCount">Output Word Count: 0</div>
+
+        <div id="paginationControls">
+            <button id="prevPage" disabled>Previous</button>
+            <button id="nextPage" disabled>Next</button>
         </div>
-        
+
+        <button id="copyBtn">Copy</button>
+        <div id="copyMessage" style="display: none;">✔ Copied!</div>
+
+        <div id="aiGeneratedPercentage">AI-generated content: 0%</div>
+        <div id="humanizedPercentage">Humanized content: 0%</div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
