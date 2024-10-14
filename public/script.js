@@ -133,12 +133,12 @@ document.getElementById('copyBtn').addEventListener('click', function () {
 
     // Show copy message
     const copyMessage = document.getElementById('copyMessage');
+    copyMessage.style.display = 'inline'; // Show the message
     copyMessage.classList.remove('hide');
     copyMessage.classList.add('show');
 
     // Hide the message after 1.5 seconds
     setTimeout(() => {
-        copyMessage.classList.remove('show');
-        copyMessage.classList.add('hide');
+        copyMessage.style.display = 'none'; // Hide after 1.5 seconds
     }, 1500);
 });
