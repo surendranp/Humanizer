@@ -26,7 +26,7 @@ const idioms = [
     "On the ball", "Pulling your leg", "The last straw", "Throw in the towel", 
     "Actions speak louder than words", "Hit the books", "Jump the gun", "Miss the boat", 
     "Once bitten, twice shy", "Out of the blue", "Time flies when you’re having fun", 
-    "Through thick and thin", "Turn a blind eye", "Under the weather", "You can’t judge a book by its cover"
+    "Through thick and thin", "Turn a blind eye", "You can’t judge a book by its cover"
 ];
 
 // Function to introduce random spelling/grammar errors
@@ -49,11 +49,11 @@ const introduceErrors = (text) => {
 // Function to add slight conversational filler
 const addFillerWords = (text) => {
     const fillers = [
-       "you know,", "well,", "basically,", "to be honest,", "like I said,", 
-    "I guess,", "sort of,", "actually,", "you see,", "just saying,", 
-    "I mean,", "kind of,", "right?", "in my opinion,", "at the end of the day,", 
-    "frankly speaking,", "to be fair,", "in a way,", "honestly,", "seriously,", 
-    "as a matter of fact,", "kind of like,", "in reality,", "truth be told,", "believe it or not,"
+        "you know,", "well,", "basically,", "to be honest,", "like I said,", 
+        "I guess,", "sort of,", "actually,", "you see,", "just saying,", 
+        "I mean,", "kind of,", "right?", "in my opinion,", "at the end of the day,", 
+        "frankly speaking,", "to be fair,", "in a way,", "honestly,", "seriously,", 
+        "as a matter of fact,", "kind of like,", "in reality,", "truth be told,", "believe it or not,"
     ];
     const sentences = text.split('.');
     return sentences.map(sentence => {
@@ -91,23 +91,125 @@ const addIdiomsAndPhrases = (text) => {
 
 // Stronger paraphrasing with more variability
 const aggressiveParaphrase = (text) => {
-    return text
-        .replace(/important/g, "crucial")
-        .replace(/difficult/g, "challenging")
-        .replace(/think/g, "believe")
-        .replace(/result/g, "outcome")
-        .replace(/shows/g, "demonstrates")
-        .replace(/However,/g, "Nonetheless,")
-        .replace(/Furthermore,/g, "Moreover,")
-        .replace(/Moreover,/g, "In addition,")
-        .replace(/benefits/g, "advantages")
-        .replace(/utilize/g, "use")
-        .replace(/obtain/g, "get")
-        .replace(/start/g, "begin")
-        .replace(/end/g, "conclude")
-        .replace(/suggest/g, "propose")
-        .replace(/happy/g, "content")
-        .replace(/sad/g, "unhappy");
+    const paraphrases = [
+        { pattern: /important/g, replacement: "crucial" },
+        { pattern: /difficult/g, replacement: "challenging" },
+        { pattern: /think/g, replacement: "believe" },
+        { pattern: /result/g, replacement: "outcome" },
+        { pattern: /shows/g, replacement: "demonstrates" },
+        { pattern: /However,/g, replacement: "Nonetheless," },
+        { pattern: /Furthermore,/g, replacement: "Moreover," },
+        { pattern: /benefits/g, replacement: "advantages" },
+        { pattern: /utilize/g, replacement: "use" },
+        { pattern: /obtain/g, replacement: "get" },
+        { pattern: /start/g, replacement: "begin" },
+        { pattern: /end/g, replacement: "conclude" },
+        { pattern: /suggest/g, replacement: "propose" },
+        { pattern: /happy/g, replacement: "content" },
+        { pattern: /sad/g, replacement: "unhappy" },
+        { pattern: /quickly/g, replacement: "rapidly" },
+        { pattern: /good/g, replacement: "excellent" },
+        { pattern: /bad/g, replacement: "poor" },
+        { pattern: /big/g, replacement: "huge" },
+        { pattern: /small/g, replacement: "tiny" },
+        { pattern: /angry/g, replacement: "furious" },
+        { pattern: /silly/g, replacement: "foolish" },
+        { pattern: /help/g, replacement: "assist" },
+        { pattern: /try/g, replacement: "attempt" },
+        { pattern: /ask/g, replacement: "inquire" },
+        { pattern: /buy/g, replacement: "purchase" },
+        { pattern: /cheap/g, replacement: "inexpensive" },
+        { pattern: /easy/g, replacement: "simple" },
+        { pattern: /hard/g, replacement: "difficult" },
+        { pattern: /happy/g, replacement: "joyful" },
+        { pattern: /important/g, replacement: "significant" },
+        { pattern: /listen/g, replacement: "hear" },
+        { pattern: /see/g, replacement: "observe" },
+        { pattern: /make/g, replacement: "create" },
+        { pattern: /get/g, replacement: "acquire" },
+        { pattern: /finish/g, replacement: "complete" },
+        { pattern: /show/g, replacement: "exhibit" },
+        { pattern: /find/g, replacement: "discover" },
+        { pattern: /think about/g, replacement: "consider" },
+        { pattern: /spend/g, replacement: "expend" },
+        { pattern: /need/g, replacement: "require" },
+        { pattern: /want/g, replacement: "desire" },
+        { pattern: /try to/g, replacement: "attempt to" },
+        { pattern: /believe in/g, replacement: "have faith in" },
+        { pattern: /talk about/g, replacement: "discuss" },
+        { pattern: /tell/g, replacement: "inform" },
+        { pattern: /go/g, replacement: "proceed" },
+        { pattern: /come/g, replacement: "arrive" },
+        { pattern: /work/g, replacement: "function" },
+        { pattern: /run/g, replacement: "operate" },
+        { pattern: /need/g, replacement: "necessitate" },
+        { pattern: /wait/g, replacement: "pause" },
+        { pattern: /ask for/g, replacement: "request" },
+        { pattern: /call/g, replacement: "contact" },
+        { pattern: /start/g, replacement: "initiate" },
+        { pattern: /show/g, replacement: "demonstrate" },
+        { pattern: /use/g, replacement: "utilize" },
+        { pattern: /say/g, replacement: "state" },
+        { pattern: /feel/g, replacement: "experience" },
+        { pattern: /believe/g, replacement: "think" },
+        { pattern: /move/g, replacement: "shift" },
+        { pattern: /try/g, replacement: "endeavor" },
+        { pattern: /walk/g, replacement: "stroll" },
+        { pattern: /eat/g, replacement: "consume" },
+        { pattern: /drink/g, replacement: "consume" },
+        { pattern: /think about/g, replacement: "reflect on" },
+        { pattern: /speak/g, replacement: "communicate" },
+        { pattern: /explain/g, replacement: "clarify" },
+        { pattern: /create/g, replacement: "produce" },
+        { pattern: /watch/g, replacement: "view" },
+        { pattern: /like/g, replacement: "enjoy" },
+        { pattern: /dislike/g, replacement: "detest" },
+        { pattern: /believe/g, replacement: "accept" },
+        { pattern: /want/g, replacement: "wish for" },
+        { pattern: /need/g, replacement: "want" },
+        { pattern: /hope/g, replacement: "aspire" },
+        { pattern: /wonder/g, replacement: "question" },
+        { pattern: /argue/g, replacement: "debate" },
+        { pattern: /achieve/g, replacement: "attain" },
+        { pattern: /provide/g, replacement: "supply" },
+        { pattern: /avoid/g, replacement: "prevent" },
+        { pattern: /discover/g, replacement: "uncover" },
+        { pattern: /persuade/g, replacement: "convince" },
+        { pattern: /conclude/g, replacement: "finish" },
+        { pattern: /enjoy/g, replacement: "appreciate" },
+        { pattern: /succeed/g, replacement: "triumph" },
+        { pattern: /maintain/g, replacement: "preserve" },
+        { pattern: /develop/g, replacement: "cultivate" },
+        { pattern: /determine/g, replacement: "decide" },
+        { pattern: /record/g, replacement: "document" },
+        { pattern: /request/g, replacement: "solicit" },
+        { pattern: /compete/g, replacement: "vie" },
+        { pattern: /suffer/g, replacement: "endure" },
+        { pattern: /share/g, replacement: "distribute" },
+        { pattern: /improve/g, replacement: "enhance" },
+        { pattern: /calculate/g, replacement: "compute" },
+        { pattern: /examine/g, replacement: "analyze" },
+        { pattern: /decide/g, replacement: "determine" },
+        { pattern: /celebrate/g, replacement: "commemorate" },
+        { pattern: /advance/g, replacement: "progress" },
+        { pattern: /limit/g, replacement: "restrict" },
+        { pattern: /attend/g, replacement: "participate" },
+        { pattern: /contribute/g, replacement: "donate" },
+        { pattern: /influence/g, replacement: "sway" },
+        { pattern: /transform/g, replacement: "change" },
+        { pattern: /educate/g, replacement: "teach" },
+        { pattern: /question/g, replacement: "interrogate" },
+        { pattern: /choose/g, replacement: "select" },
+        { pattern: /include/g, replacement: "incorporate" },
+        { pattern: /analyze/g, replacement: "examine" },
+        { pattern: /decide/g, replacement: "choose" },
+    ];
+
+    for (const { pattern, replacement } of paraphrases) {
+        text = text.replace(pattern, replacement);
+    }
+
+    return text;
 };
 
 // Applying all transformations for humanization
@@ -152,24 +254,6 @@ const fetchValidatedText = async (inputText) => {
     }
 };
 
-// Function to calculate AI-generated content percentage
-const calculateAIGeneratedPercentage = (originalText, humanizedText) => {
-    const originalWords = originalText.split(/\s+/);
-    const humanizedWords = humanizedText.split(/\s+/);
-    let unchangedWords = 0;
-
-    // Count how many words remained the same
-    for (let i = 0; i < Math.min(originalWords.length, humanizedWords.length); i++) {
-        if (originalWords[i] === humanizedWords[i]) {
-            unchangedWords++;
-        }
-    }
-
-    // Calculate percentage of AI-generated (unchanged) content
-    const aiGeneratedPercentage = (unchangedWords / originalWords.length) * 100;
-    return aiGeneratedPercentage.toFixed(2); // Return a percentage with 2 decimal places
-};
-
 app.post('/humanize', async (req, res) => {
     const { inputText } = req.body;
 
@@ -181,14 +265,8 @@ app.post('/humanize', async (req, res) => {
         let humanizedText = humanizeTextLocally(inputText);
         const finalText = await fetchValidatedText(humanizedText);
 
-        // Calculate AI-generated and humanized content percentages
-        const aiGeneratedPercentage = calculateAIGeneratedPercentage(inputText, finalText);
-        const humanizedPercentage = (100 - aiGeneratedPercentage).toFixed(2);
-
         res.json({ 
             transformedText: finalText,
-            aiGeneratedPercentage,
-            humanizedPercentage
         });
     } catch (error) {
         console.error('Error:', error);
