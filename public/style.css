@@ -8,15 +8,39 @@ body {
     height: 100vh;
 }
 
+.navbar {
+    transition: background-color 0.5s ease;
+}
+
+.navbar.scrolled {
+    background-color: #007bff !important; /* Darker background on scroll */
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+}
+main{
+    padding-top: 5em;
+    height: 100vh;
+    width: 100%;
+    background-image: url('./images/banner\ images.jpg');
+    background-size: cover;
+
+}
 .container {
-    background-color: #fff;
+    /* background-color: #fff; */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 1500px; /* Adjusted width for more space */
+    max-width: 1000px; /* Adjusted width for more space */
     text-align: center;
+    background: rgba( 255, 255, 255, 0.25 );
+box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+backdrop-filter: blur( 9px );
+-webkit-backdrop-filter: blur( 9px );
+border-radius: 10px;
+border: 1px solid rgba( 255, 255, 255, 0.18 );
 }
-
+textarea{
+    opacity: 90%;
+}
 .loader {
     border: 8px solid #f3f3f3; /* Light gray */
     border-top: 8px solid #4CAF50; /* Green */
