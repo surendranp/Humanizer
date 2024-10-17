@@ -6,6 +6,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    background-color: #03045e;
+
 }
 
 .navbar {
@@ -42,7 +44,7 @@ main{
     height: 110vh;
     width: 100%;
     /* background-image: url('./images/banner-images.jpg'); */
-    background-color: 03045e;
+    background-color: #03045e;
     /* background-size: cover; */
 
 }
