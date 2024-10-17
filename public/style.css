@@ -2,11 +2,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
-    background-color: #03045e;
 
 }
 
@@ -39,28 +35,19 @@ body {
 .navbar-nav .nav-link {
     animation: slideDown 0.5s ease forwards;
 }
-main{
-    padding-top: 10em;
-    height: 110vh;
-    width: 100%;
-    /* background-image: url('./images/banner-images.jpg'); */
-    background-color: #03045e;
-    /* background-size: cover; */
 
-}
-.container {
-    /* background-color: #fff; */
+.container { 
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     max-width: 1500px; /* Adjusted width for more space */
     text-align: center;
     background: rgba( 255, 255, 255, 0.25 );
-box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-backdrop-filter: blur( 9px );
--webkit-backdrop-filter: blur( 9px );
-border-radius: 10px;
-border: 1px solid rgba( 255, 255, 255, 0.18 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 9px );
+    -webkit-backdrop-filter: blur( 9px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
 }
 textarea{
     opacity: 90%;
@@ -74,7 +61,15 @@ textarea{
     animation: spin 1s linear infinite;
     margin: 20px auto; /* Center the loader */
 }
+section{
+    background-color: #03045e;
 
+}
+.tool{
+    width: 100%;
+    height: auto;
+    margin-top: 5em;
+}
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -111,4 +106,7 @@ textarea{
 
 #copyMessage.hide {
     opacity: 0; /* Hide when the class is added */
+}
+.icons{
+    gap: 1em;
 }
