@@ -11,7 +11,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 
     document.getElementById('loader').style.display = 'block';
-    document.getElementById('humanizedText').value = ''; // Clear previous output
+    document.getElementById('humanizedText').innerText = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
@@ -60,10 +60,6 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 function displayOutput() {
     const outputContainer = document.getElementById('humanizedText'); // Use the correct text area ID
     outputContainer.value = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.'; // Set value instead of innerHTML
-
-    // Update word count for the currently displayed output
-    const outputWordCount = outputs[currentPage] ? outputs[currentPage].trim().split(/\s+/).length : 0;
-    document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
 }
 
 // Update pagination controls
@@ -103,42 +99,16 @@ document.getElementById('inputText').addEventListener('input', function () {
     document.getElementById('wordCount').innerText = `Word Count: ${wordCount}`;
 });
 
-// Clear button functionality
 document.getElementById('clearBtn').addEventListener('click', function () {
-    // Clear the input text
     document.getElementById('inputText').value = '';
-    
-    // Clear the output text area
-    document.getElementById('humanizedText').value = ''; 
-
-    // Reset word count and percentage displays
+    document.getElementById('humanizedText').value = ''; // Clear the text area value
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
-    document.getElementById('wordCount').innerText = 'Word Count: 0'; // Reset input word count
+    document.getElementById('wordCount').innerText = 'Word Count: 0'; // Reset the word count
 
     // Clear stored outputs
-    outputs.length = 0; // Clear the outputs array
-    currentPage = 0;    // Reset the current page to 0
-
-    // Hide pagination controls
-    document.getElementById('paginationControls').style.display = 'none'; 
-});
-
-// Copy functionality
-document.getElementById('copyBtn').addEventListener('click', function () {
-    const humanizedText = document.getElementById('humanizedText');
-    humanizedText.select();
-    document.execCommand('copy');
-
-    // Show copy message
-    const copyMessage = document.getElementById('copyMessage');
-    copyMessage.style.display = 'inline'; // Show the message
-    copyMessage.classList.remove('hide');
-    copyMessage.classList.add('show');
-
-    // Hide the message after 1.5 seconds
-    setTimeout(() => {
-        copyMessage.style.display = 'none'; // Hide after 1.5 seconds
-    }, 1500);
+    outputs.length = 0;
+    currentPage = 0; // Reset page to 0
+    document.getElementById('paginationControls').style.display = 'none'; // Hide pagination controls
 });
