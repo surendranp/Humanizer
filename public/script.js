@@ -30,6 +30,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         }
 
         const data = await response.json();
+
+        // Hide loader and display output
         document.getElementById('loader').style.display = 'none';
 
         // Store the output
@@ -44,7 +46,6 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
         document.getElementById('aiGeneratedPercentage').innerText = `AI-generated content: ${data.aiGeneratedPercentage}%`;
         document.getElementById('humanizedPercentage').innerText = `Humanized content: ${data.humanizedPercentage}%`;
-        document.getElementById('retryBtn').style.display = 'inline';
 
         // Show pagination controls
         updatePaginationControls();
@@ -52,14 +53,14 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     } catch (error) {
         console.error('Error:', error);
         alert('Error occurred while humanizing the text. Please try again.');
-        document.getElementById('loader').style.display = 'none';
+        document.getElementById('loader').style.display = 'none'; // Hide the loader on error
     }
 });
 
 // Display the current output based on the current page
 function displayOutput() {
-    const outputContainer = document.getElementById('humanizedText'); // Use the correct text area ID
-    outputContainer.value = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.'; // Set value instead of innerHTML
+    const outputContainer = document.getElementById('humanizedText');
+    outputContainer.value = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.';
 
     // Update word count for the currently displayed output
     const outputWordCount = outputs[currentPage] ? outputs[currentPage].trim().split(/\s+/).length : 0;
@@ -100,7 +101,7 @@ document.getElementById('nextPage').addEventListener('click', () => {
 document.getElementById('inputText').addEventListener('input', function () {
     const inputText = this.value;
     const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
-    document.getElementById('wordCount').innerText = `Word Count: ${wordCount}`;
+    document.getElementById('wordCount').innerText = `Input Word Count: ${wordCount}`;
 });
 
 // Clear button functionality
@@ -115,7 +116,7 @@ document.getElementById('clearBtn').addEventListener('click', function () {
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
     document.getElementById('humanizedPercentage').innerText = 'Humanized content: 0%';
-    document.getElementById('wordCount').innerText = 'Word Count: 0'; // Reset input word count
+    document.getElementById('wordCount').innerText = 'Input Word Count: 0'; // Reset input word count
 
     // Clear stored outputs
     outputs.length = 0; // Clear the outputs array
