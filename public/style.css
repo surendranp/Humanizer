@@ -38,10 +38,10 @@ body {
     animation: slideDown 0.5s ease forwards;
 }
 main{
-    padding-top: 5em;
-    height: 100vh;
+    padding-top: 10em;
+    height: 110vh;
     width: 100%;
-    background-image: url('./images/banner\ images.jpg');
+    background-image: url('./images/banner-images.jpg');
     background-size: cover;
 
 }
