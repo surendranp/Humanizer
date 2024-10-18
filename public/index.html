@@ -14,13 +14,14 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-transparent fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><img src="./images/logo-Black.png" width="60" height="60" alt="texthumanizer.com"></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <!-- <button class="navbar-toggler" >
+            </button> -->
+            <span class="navbar-toggler-icon navbar-toggler"type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"></span>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
+                <ul class="navbar-nav ml-auto ">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
+                        <a class="nav-link active ps-sm-5" href="#">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Features</a>
@@ -39,7 +40,7 @@
      <section class="container-fluid pb-5">
     <main class="tool ">
         <h1 class="text-center mb-4 text-light pt-3">AI Text Humanizer</h1>
-        <div id="loader" class="loader" style="display:none;"></div>
+        <div id="loader"  class="loader" style="display:none;"></div>
 
         <div class="container">
             <div class="row">
@@ -54,10 +55,10 @@
                     <!-- <p class="text-light">Humanized Text:</p> -->
                     <textarea id="humanizedText" class="form-control" rows="15" placeholder="Humanize text display here..." readonly ></textarea>
                     <p id="outputWordCount" class="mt-2 text-light">Output Word Count: 0</p>
-                    <div id="paginationControls" class="d-flex justify-content-between gap-5 mt-2" style="display:none;">
+                    <div id="paginationControls" class="d-flex justify-content-between  gap-5 mt-2  paginationControls1" >
                         <div class="copy">
                             <button id="copyBtn" class="btn btn-info mt-2">Copy</button>
-                            <span id="copyMessage" style="display:none;">Copied!</span>
+                            <span id="copyMessage" style="display:none; color: #ffffff;">Copied!</span>
                         </div>
                         <div class="buttons mt-2">
                             <button id="prevPage" class="btn rounded-circle" style="background-color: #48cae4;" disabled>
@@ -87,18 +88,18 @@
 
 </section>
 <footer>
-    <div class="container-fluid bg-dark">
-<div class="row">
-    <div class="col-7 d-flex flex-row  ">
+    <div class="container-fluid bg-dark h-auto ">
+<div class="row d-flex">
+    <div class="col-lg-7 col-sm-7 col-md-7 d-flex flex-row  ">
         <a class="navbar-brand " href="#"><img src="./images/logo-1.png" width="60" height="60" alt="texthumanizer.com"></a>
         <div class="text-center me-5 py-4 text-capitalize text-light">
             &copy; 2024 texthumanize.com | All rights reserved. | Developed by  ( <a href="https://www.edatic.in/" class="text-decoration-none text-warning fw-bold">Edatic.in</a> )
         </div>
     </div>
-    <div class="col-5 d-flex flex-row  icons justify-content-end ">
-        <i class="fa-brands fa-square-facebook fa-xl " style="color: #ffffff; margin-top: 1em;"></i>
-        <i class="fa-brands fa-square-instagram fa-xl" style="color: #ffffff; margin-top: 1em;"></i>
-        <i class="fa-brands fa-x-twitter fa-xl" style="color: #ffffff; margin-top: 1em;"></i>
+    <div class="col-lg-5 col-md-5 col-sm-5 d-flex flex-row  icons justify-content-end icons ">
+        <i class="fa-brands fa-square-facebook fa-xl " style="color: #ffffff; margin-top: 1.5em; margin-bottom: 1.5em;"></i>
+        <i class="fa-brands fa-square-instagram fa-xl" style="color: #ffffff; margin-top: 1.5em; margin-bottom: 1.5em;"></i>
+        <i class="fa-brands fa-x-twitter fa-xl" style="color: #ffffff; margin-top: 1.5em; margin-bottom: 1.5em;"></i>
     </div>
 </div>
     </div>
@@ -110,31 +111,58 @@
 
     <!-- Sticky Navbar Animation Script -->
     <script>
-       $(document).ready(function () {
-            // Change the navbar background when scrolled
-            $(window).scroll(function () {
-                if ($(this).scrollTop() > 10) {
-                    $('.navbar').addClass('scrolled');
-                } else {
-                    $('.navbar').removeClass('scrolled');
-                }
-            });
-        });
-
-        // changing logo 
-        $(document).ready(function () {
-        // Change the navbar background when scrolled
-        $(window).scroll(function () {
-            if ($(this).scrollTop() > 10) {
-                $('.navbar').addClass('scrolled');
-                $('.navbar-brand img').attr('src', './images/logo-1.png');  // Change to logo-1 on scroll
+  $(document).ready(function () {
+    function updateNavbarStyles() {
+        if ($(window).width() <= 992) {
+            if ($('.navbar').hasClass('scrolled')) {
+                $('.navbar-collapse').css('background-color', '#0f1010e2');
             } else {
-                $('.navbar').removeClass('scrolled');
-                $('.navbar-brand img').attr('src', './images/logo-Black.png');  // Revert to original logo
+                $('.navbar-collapse').css('background-color', 'white');
             }
-        });
+        } else {
+            // Reset background color for desktop view
+            $('.navbar-collapse').css('background-color', ''); // Or set a specific color
+        }
+    }
+
+    function updateTogglerIconColor() {
+        if ($('.navbar').hasClass('scrolled')) {
+            $('.navbar-toggler-icon').css('background-color', '#fff'); // Change to white when scrolled
+        } else {
+            $('.navbar-toggler-icon').css('background-color', 'transparent '); // Change to black when at the top
+        }
+    }
+
+    // Change the navbar background when scrolled
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 10) {
+            // For nav bar 
+            $('.navbar').addClass('scrolled');
+            // For logo
+            $('.navbar-brand img').attr('src', './images/logo-1.png'); 
+            updateTogglerIconColor(); // Update toggler icon color on scroll
+            updateNavbarStyles(); // Update navbar styles on scroll
+        } else {
+            $('.navbar').removeClass('scrolled');
+            $('.navbar-brand img').attr('src', './images/logo-Black.png');
+            updateTogglerIconColor(); // Update toggler icon color on scroll
+            updateNavbarStyles(); // Update navbar styles on scroll
+        }
     });
+
+    // Update styles on window resize
+    $(window).resize(function () {
+        updateNavbarStyles();
+        updateTogglerIconColor(); // Ensure toggler icon color is updated on resize
+    });
+
+    // Initial call to set styles based on initial window size
+    updateNavbarStyles();
+    updateTogglerIconColor(); // Set initial toggler icon color
+});
+
     </script>
+
 
 </body>
 </html>

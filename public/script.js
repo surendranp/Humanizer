@@ -34,8 +34,12 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         // Hide loader and display output
         document.getElementById('loader').style.display = 'none';
 
-        // Store the output
-        outputs.push(data.transformedText);
+        // Store the output with percentages
+        outputs.push({
+            transformedText: data.transformedText,
+            aiGeneratedPercentage: data.aiGeneratedPercentage,
+            humanizedPercentage: data.humanizedPercentage
+        });
         currentPage = outputs.length - 1; // Set to the last generated output
 
         // Display the latest output
@@ -60,11 +64,19 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 // Display the current output based on the current page
 function displayOutput() {
     const outputContainer = document.getElementById('humanizedText');
-    outputContainer.value = outputs.length > 0 ? outputs[currentPage] : 'No outputs generated yet.';
+    const currentOutput = outputs[currentPage];
 
-    // Update word count for the currently displayed output
-    const outputWordCount = outputs[currentPage] ? outputs[currentPage].trim().split(/\s+/).length : 0;
-    document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+    if (currentOutput) {
+        outputContainer.value = currentOutput.transformedText;
+
+        // Update word count for the currently displayed output
+        const outputWordCount = currentOutput.transformedText.trim().split(/\s+/).length;
+        document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
+        document.getElementById('aiGeneratedPercentage').innerText = `AI-generated content: ${currentOutput.aiGeneratedPercentage}%`;
+        document.getElementById('humanizedPercentage').innerText = `Humanized content: ${currentOutput.humanizedPercentage}%`;
+    } else {
+        outputContainer.value = 'No outputs generated yet.';
+    }
 }
 
 // Update pagination controls

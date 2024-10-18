@@ -35,7 +35,20 @@ body {
 .navbar-nav .nav-link {
     animation: slideDown 0.5s ease forwards;
 }
+.navbar-toggler{
+    /* background: #000; */
+    border-style: none;
+}
+.navbar-toggler-icon {
+    color: white;
+    transition: background-color 0.3s ease;
+    border-radius: 5em;
+}
 
+.navbar-collapse {
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
 .container { 
     padding: 20px;
     border-radius: 8px;
@@ -59,7 +72,11 @@ textarea{
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;
-    margin: 20px auto; /* Center the loader */
+    position: fixed;
+    z-index: 1000;
+    top: 22%; /* Center vertically */
+    left: 48%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust position to truly center */
 }
 section{
     background-color: #03045e;
@@ -76,6 +93,7 @@ section{
 }
 
 /* Styles for the copy button */
+
 #copyBtn {
     background-color: #4CAF50; /* Green */
     color: white;
@@ -109,4 +127,23 @@ section{
 }
 .icons{
     gap: 1em;
+}
+.paginationControls1{
+    width: 50%;
+    height: auto;
+    flex-wrap: wrap;
+    margin-left: 45%;
+    /* background: #000; */
+
+}
+@media (max-width: 989px){
+    .paginationControls1{
+        width: 100%;
+        height: auto;
+        display:none;
+        flex-wrap: wrap;
+        margin-left: 0%;
+
+
+    }
 }
