@@ -21,7 +21,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto ">
                     <li class="nav-item">
-                        <a class="nav-link active ps-sm-5" href="#">Home</a>
+                        <a class="nav-link active " href="#">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Features</a>
@@ -50,6 +50,8 @@
                     <p id="wordCount" class="mt-2 text-light">Input Word Count: 0</p>
                     <button id="submitBtn" class="btn btn-primary mt-2">Humanize Text</button>
                     <button id="clearBtn" class="btn btn-danger mt-2">Clear</button>
+                    <div id="wordLimitMessage" style="display:none; color:red;">Please enter below 500 words.</div>
+
                 </div>
                 <div class="col-md-6 mb-3">
                     <!-- <p class="text-light">Humanized Text:</p> -->
@@ -108,60 +110,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <script src="jquery.js"></script>
 
-    <!-- Sticky Navbar Animation Script -->
-    <script>
-  $(document).ready(function () {
-    function updateNavbarStyles() {
-        if ($(window).width() <= 992) {
-            if ($('.navbar').hasClass('scrolled')) {
-                $('.navbar-collapse').css('background-color', '#0f1010e2');
-            } else {
-                $('.navbar-collapse').css('background-color', 'white');
-            }
-        } else {
-            // Reset background color for desktop view
-            $('.navbar-collapse').css('background-color', ''); // Or set a specific color
-        }
-    }
 
-    function updateTogglerIconColor() {
-        if ($('.navbar').hasClass('scrolled')) {
-            $('.navbar-toggler-icon').css('background-color', '#fff'); // Change to white when scrolled
-        } else {
-            $('.navbar-toggler-icon').css('background-color', 'transparent '); // Change to black when at the top
-        }
-    }
-
-    // Change the navbar background when scrolled
-    $(window).scroll(function () {
-        if ($(this).scrollTop() > 10) {
-            // For nav bar 
-            $('.navbar').addClass('scrolled');
-            // For logo
-            $('.navbar-brand img').attr('src', './images/logo-1.png'); 
-            updateTogglerIconColor(); // Update toggler icon color on scroll
-            updateNavbarStyles(); // Update navbar styles on scroll
-        } else {
-            $('.navbar').removeClass('scrolled');
-            $('.navbar-brand img').attr('src', './images/logo-Black.png');
-            updateTogglerIconColor(); // Update toggler icon color on scroll
-            updateNavbarStyles(); // Update navbar styles on scroll
-        }
-    });
-
-    // Update styles on window resize
-    $(window).resize(function () {
-        updateNavbarStyles();
-        updateTogglerIconColor(); // Ensure toggler icon color is updated on resize
-    });
-
-    // Initial call to set styles based on initial window size
-    updateNavbarStyles();
-    updateTogglerIconColor(); // Set initial toggler icon color
-});
-
-    </script>
 
 
 </body>

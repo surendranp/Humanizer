@@ -1,9 +1,21 @@
 const outputs = []; // Array to store generated outputs
 let currentPage = 0; // Track current page
 const outputsPerPage = 1; // Number of outputs per page
+const wordLimit = 500; // Set the word limit to 500
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
+
+    // Calculate word count
+    const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
+
+    // Check if word count exceeds 500
+    if (wordCount > wordLimit) {
+        document.getElementById('wordLimitMessage').style.display = 'block'; // Show the message
+        return; // Stop further execution if the word count is over 500
+    } else {
+        document.getElementById('wordLimitMessage').style.display = 'none'; // Hide the message when within limit
+    }
 
     if (!inputText.trim()) {
         alert('Please enter some text.');
@@ -114,6 +126,13 @@ document.getElementById('inputText').addEventListener('input', function () {
     const inputText = this.value;
     const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
     document.getElementById('wordCount').innerText = `Input Word Count: ${wordCount}`;
+
+    // Check word limit on input change
+    if (wordCount > wordLimit) {
+        document.getElementById('wordLimitMessage').style.display = 'block';
+    } else {
+        document.getElementById('wordLimitMessage').style.display = 'none';
+    }
 });
 
 // Clear button functionality

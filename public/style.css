@@ -29,7 +29,7 @@ body {
 }
 
 .nav-link.active {
-    color: rgb(255, 166, 0) !important;
+    color: #48cae4 !important;
 }
 
 .navbar-nav .nav-link {
@@ -44,11 +44,15 @@ body {
     transition: background-color 0.3s ease;
     border-radius: 5em;
 }
-
 .navbar-collapse {
+    width: 50%;
     background-color: transparent;
-    transition: background-color 0.3s ease;
+    transition: max-height background-color 0.3s ease;
+    position: relative;
+    /* transition: max-height 0.5s ease; */
+    overflow: hidden;
 }
+
 .container { 
     padding: 20px;
     border-radius: 8px;
@@ -136,6 +140,9 @@ section{
     /* background: #000; */
 
 }
+.bg{
+    background: #000;
+}
 @media (max-width: 989px){
     .paginationControls1{
         width: 100%;
@@ -143,7 +150,41 @@ section{
         display:none;
         flex-wrap: wrap;
         margin-left: 0%;
+        overflow: hidden;
+    }
+    .nav-item{
+        /* background: #000; */
+        width: 40%;
+        padding-left: 2em;
+        /* margin-left: 50em; */
+    }
+    .navbar-collapse{
+        position: absolute;
+        top: 5.5em;
+        border-bottom-left-radius:2em ;
+        left: 26.5em;
+        background: #000;
+        width: 70%;
+        width: 100%;
+    }
+}
+@media (max-width:595px){
+    .nav-item{
+        /* background: #000; */
+        width: 100%;
+        padding-left: 2em;
+        padding-bottom: 5px;
 
-
+        /* margin-left: 50em; */
+    }
+    .navbar-collapse{
+        position: absolute;
+        top: 5.5em;
+        border-bottom-left-radius:2em ;
+        left: 8.5em;
+        background: #000;
+        width: 80%;
+        transition:0.5s ease ;
+        
     }
 }
