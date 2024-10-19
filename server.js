@@ -116,7 +116,29 @@ const aggressiveParaphrase = (text) => {
         .replace(/happy/g, "content")
         .replace(/sad/g, "unhappy");
 };
+// Function to split long input text into smaller chunks
+const splitIntoChunks = (text, chunkSize) => {
+    const words = text.split(/\s+/);
+    let chunks = [];
+    for (let i = 0; i < words.length; i += chunkSize) {
+        chunks.push(words.slice(i, i + chunkSize).join(' '));
+    }
+    return chunks;
+};
 
+// Function to process each chunk and concatenate the final result
+const processInChunks = async (inputText) => {
+    const chunks = splitIntoChunks(inputText, 150); // Split into chunks of 150 words
+    let finalResult = '';
+
+    for (const chunk of chunks) {
+        let chunkHumanized = humanizeTextLocally(chunk);  // Humanize locally first
+        let refinedChunk = await fetchValidatedText(chunkHumanized);  // Refine with OpenAI
+        finalResult += ' ' + refinedChunk;  // Concatenate the results
+    }
+
+    return finalResult.trim();
+};
 // Applying all transformations for humanization
 const humanizeTextLocally = (inputText) => {
     let text = introduceErrors(inputText);            // Step 1: Introduce random errors
