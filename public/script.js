@@ -19,7 +19,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 
     if (!inputText.trim()) {
-        alert('Please enter some text.');
+        showAlert('Please enter some text.', 'danger'); // Show alert instead of alert()
         return;
     }
 
@@ -69,10 +69,47 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
     } catch (error) {
         console.error('Error:', error);
-        alert('Error occurred while humanizing the text. Please try again.');
+        showAlert('Error occurred while humanizing the text. Please try again.', 'danger');
         document.getElementById('loader').style.display = 'none'; // Hide the loader on error
     }
 });
+
+// Function to show Bootstrap alerts
+function showAlert(message, type) {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
+    alertContainer.role = 'alert';
+    alertContainer.innerHTML = `
+        ${message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    `;
+
+    // Set styles to center the alert
+    alertContainer.style.position = 'fixed';
+    alertContainer.style.top = '50%';
+    alertContainer.style.left = '50%';
+    alertContainer.style.transform = 'translate(-50%, -50%)';
+    alertContainer.style.zIndex = '1050'; // Ensure it's above other content
+    alertContainer.style.width = '400px';  // Width set to 300 pixels
+    alertContainer.style.height = '200px'; // Height set to 100 pixels
+    alertContainer.style.overflow = 'hidden'; // Prevent overflow of text
+    alertContainer.style.display = 'flex'; // Use flexbox to center text
+    alertContainer.style.fontSize='24px';
+    alertContainer.style.alignItems = 'center'; // Vertically center
+    alertContainer.style.justifyContent = 'center'; // Horizontally center
+    alertContainer.style.backgroundColor = '#000000a2'; // Set your desired background color here
+    alertContainer.style.color = '#fff'; // Optional: Set text color to white for better contrast
+
+    document.body.appendChild(alertContainer); // Append the alert to the body
+
+    // Automatically remove the alert after 3 seconds
+    setTimeout(() => {
+        $(alertContainer).alert('close');
+    }, 3000);
+}
+
 
 // Display the current output based on the current page
 function displayOutput() {
