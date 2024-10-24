@@ -2,6 +2,7 @@ const outputs = []; // Array to store generated outputs
 let currentPage = 0; // Track current page
 const outputsPerPage = 1; // Number of outputs per page
 const wordLimit = 500; // Set the word limit to 500
+let isEditMode = false; // To toggle between edit mode and read-only mode
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
@@ -86,6 +87,11 @@ function displayOutput() {
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
         document.getElementById('aiGeneratedPercentage').innerText = `AI-generated content: ${currentOutput.aiGeneratedPercentage}%`;
         document.getElementById('humanizedPercentage').innerText = `Humanized content: ${currentOutput.humanizedPercentage}%`;
+
+        // Toggle edit mode
+        outputContainer.readOnly = !isEditMode;
+        document.getElementById('editBtn').style.display = isEditMode ? 'none' : 'inline';
+        document.getElementById('updateBtn').style.display = isEditMode ? 'inline' : 'none';
     } else {
         outputContainer.value = 'No outputs generated yet.';
     }
@@ -102,6 +108,21 @@ function updatePaginationControls() {
     // Disable Next button if on the last output
     document.getElementById('nextPage').disabled = currentPage >= outputs.length - 1;
 }
+
+// Toggle edit mode
+document.getElementById('editBtn').addEventListener('click', () => {
+    isEditMode = true;
+    displayOutput();
+});
+
+// Save the edited content
+document.getElementById('updateBtn').addEventListener('click', () => {
+    const outputContainer = document.getElementById('humanizedText');
+    outputs[currentPage].transformedText = outputContainer.value; // Update the stored output
+
+    isEditMode = false;
+    displayOutput();
+});
 
 // Previous page button
 document.getElementById('prevPage').addEventListener('click', () => {
