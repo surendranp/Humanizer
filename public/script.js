@@ -1,6 +1,5 @@
 const outputs = []; // Array to store generated outputs
 let currentPage = 0; // Track current page
-const outputsPerPage = 1; // Number of outputs per page
 const wordLimit = 500; // Set the word limit to 500
 
 document.getElementById('submitBtn').addEventListener('click', async function () {
@@ -9,12 +8,12 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     // Calculate word count
     const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
 
-    // Check if word count exceeds 500
+    // Check if word count exceeds the limit
     if (wordCount > wordLimit) {
-        document.getElementById('wordLimitMessage').style.display = 'block'; // Show the message
-        return; // Stop further execution if the word count is over 500
+        document.getElementById('wordLimitMessage').style.display = 'block'; // Show message
+        return; // Stop execution if word count exceeds the limit
     } else {
-        document.getElementById('wordLimitMessage').style.display = 'none'; // Hide the message when within limit
+        document.getElementById('wordLimitMessage').style.display = 'none'; // Hide message when within the limit
     }
 
     if (!inputText.trim()) {
@@ -22,7 +21,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         return;
     }
 
-    document.getElementById('loader').style.display = 'block';
+    document.getElementById('loader').style.display = 'block'; // Show loader
     document.getElementById('humanizedText').value = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
@@ -43,7 +42,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
         const data = await response.json();
 
-        // Hide loader and display output
+        // Hide loader
         document.getElementById('loader').style.display = 'none';
 
         // Store the output with percentages
@@ -73,7 +72,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     }
 });
 
-// Display the current output based on the current page
+// Function to display the current output based on the current page
 function displayOutput() {
     const outputContainer = document.getElementById('humanizedText');
     const currentOutput = outputs[currentPage];
@@ -91,35 +90,45 @@ function displayOutput() {
     }
 }
 
-// Update pagination controls
+// Update pagination controls (Next/Previous buttons)
 function updatePaginationControls() {
     const paginationControls = document.getElementById('paginationControls');
     paginationControls.style.display = 'flex';
 
-    // Disable Previous button if on first page
+    // Disable Previous button if on the first page
     document.getElementById('prevPage').disabled = currentPage === 0;
 
     // Disable Next button if on the last output
     document.getElementById('nextPage').disabled = currentPage >= outputs.length - 1;
 }
 
-// Previous page button
+// Previous page button event listener
 document.getElementById('prevPage').addEventListener('click', () => {
     if (currentPage > 0) {
+        saveEditedOutput(); // Save changes before navigating
         currentPage--;
         displayOutput();
         updatePaginationControls();
     }
 });
 
-// Next page button
+// Next page button event listener
 document.getElementById('nextPage').addEventListener('click', () => {
     if (currentPage < outputs.length - 1) {
+        saveEditedOutput(); // Save changes before navigating
         currentPage++;
         displayOutput();
         updatePaginationControls();
     }
 });
+
+// Save any changes made to the current output
+function saveEditedOutput() {
+    const editedText = document.getElementById('humanizedText').value;
+    if (outputs[currentPage]) {
+        outputs[currentPage].transformedText = editedText;
+    }
+}
 
 // Add event listener for input changes to update word count dynamically
 document.getElementById('inputText').addEventListener('input', function () {
