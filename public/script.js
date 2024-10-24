@@ -106,6 +106,7 @@ function updatePaginationControls() {
 // Previous page button
 document.getElementById('prevPage').addEventListener('click', () => {
     if (currentPage > 0) {
+        saveEditedOutput(); // Save any changes before navigating
         currentPage--;
         displayOutput();
         updatePaginationControls();
@@ -115,11 +116,20 @@ document.getElementById('prevPage').addEventListener('click', () => {
 // Next page button
 document.getElementById('nextPage').addEventListener('click', () => {
     if (currentPage < outputs.length - 1) {
+        saveEditedOutput(); // Save any changes before navigating
         currentPage++;
         displayOutput();
         updatePaginationControls();
     }
 });
+
+// Save any changes made to the current output
+function saveEditedOutput() {
+    const editedText = document.getElementById('humanizedText').value;
+    if (outputs[currentPage]) {
+        outputs[currentPage].transformedText = editedText;
+    }
+}
 
 // Add event listener for input changes to update word count dynamically
 document.getElementById('inputText').addEventListener('input', function () {
