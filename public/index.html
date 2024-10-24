@@ -57,22 +57,23 @@
                     <!-- <p class="text-light">Humanized Text:</p> -->
                     <textarea id="humanizedText" class="form-control" rows="15" placeholder="Humanize text display here..." readonly ></textarea>
                     <p id="outputWordCount" class="mt-2 text-light">Output Word Count: 0</p>
-                    <div id="paginationControls" class="d-flex justify-content-between  gap-5 mt-2  paginationControls1" >
-                        <div class="copy">
+                    <div id="paginationControls" class="d-flex justify-content-between   mt-2  paginationControls1" >
+                        <div class="copy  d-flex flex-row flex-wrap w-50 justify-content-around">
                             <button id="copyBtn" class="btn btn-info mt-2">Copy</button>
                             <span id="copyMessage" style="display:none; color: #ffffff;">Copied!</span>
+                            <div class="edit-options ">
+                                <button id="editBtn" class="btn btn-warning mt-2">Edit</button>
+                                <button id="updateBtn" class="btn btn-success mt-2" style="display:none;">Update</button>
+                            </div>
                         </div>
-                        <div class="buttons mt-2">
+                        <div class="buttons mt-2 d-flex flex-row">
                             <button id="prevPage" class="btn rounded-circle" style="background-color: #48cae4;" disabled>
                                 <i class="fa-solid fa-left-long text-light"></i>
                             </button>
                             <button id="nextPage" class="btn rounded-circle" style="background-color: #48cae4;">
                                 <i class="fa-solid fa-right-long text-light"></i>
                             </button>
-                            <div class="edit-options">
-                                <button id="editBtn" class="btn btn-warning mt-2">Edit</button>
-                                <button id="updateBtn" class="btn btn-success mt-2" style="display:none;">Update</button>
-                            </div>
+                           
                         </div>
                     </div>
                     <p id="aiGeneratedPercentage" class="mt-2 text-light">AI-generated content: 0%</p>

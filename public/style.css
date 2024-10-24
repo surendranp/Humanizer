@@ -99,19 +99,54 @@ section{
 /* Styles for the copy button */
 
 #copyBtn {
-    background-color: #4CAF50; /* Green */
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    background: rgba( 78, 146, 1, 0.5 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4.5px );
+    -webkit-backdrop-filter: blur( 4.5px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
 }
-
+#editBtn{
+    background: rgba( 248, 231, 28, 0.5 );
+box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+backdrop-filter: blur( 4.5px );
+-webkit-backdrop-filter: blur( 4.5px );
+border-radius: 10px;
+color: #f0f0f0;
+border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+#submitBtn{
+    background: rgba( 78, 146, 1, 0.5 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4.5px );
+    -webkit-backdrop-filter: blur( 4.5px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+#clearBtn{
+    background: rgba( 217, 4, 4, 0.4 );
+box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+backdrop-filter: blur( 4.5px );
+-webkit-backdrop-filter: blur( 4.5px );
+border-radius: 10px;
+border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
 #copyBtn:hover {
     background-color: #45a049; /* Darker green on hover */
 }
+#editBtn:hover {
+    background-color: #d5b92f; /* Darker green on hover */
+}
+#submitBtn:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+#clearBtn:hover {
+    background-color: #a04545; /* Darker green on hover */
+}
+
 
 /* Styles for the "Copied!" message */
 #copyMessage {
