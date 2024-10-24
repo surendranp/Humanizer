@@ -138,13 +138,13 @@ border: 1px solid rgba( 255, 255, 255, 0.18 );
     background-color: #45a049; /* Darker green on hover */
 }
 #editBtn:hover {
-    background-color: #d5b92f; /* Darker green on hover */
+    background-color: #ffdd32; /* Darker green on hover */
 }
 #submitBtn:hover {
     background-color: #45a049; /* Darker green on hover */
 }
 #clearBtn:hover {
-    background-color: #a04545; /* Darker green on hover */
+    background-color: #cd1919; /* Darker green on hover */
 }
 
 
