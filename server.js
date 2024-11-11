@@ -1,234 +1,359 @@
-require('dotenv').config();
-
 const express = require('express');
-const axios = require('axios');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
+const nodemailer = require('nodemailer');
+const cron = require('node-cron');
+const fs = require('fs');
+const { Parser } = require('json2csv');
+const axios = require('axios');
+require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const mongoUri = process.env.MONGODB_URI;
+mongoose.connect(mongoUri)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
-// Expanded list of idioms and informal phrases
-const idioms = [
-    "A blessing in disguise",
-    "Break the ice",
-    "Hit the nail on the head",
-    "Speak of the devil",
-    "Once in a blue moon",
-    "Bite the bullet",
-    "Better late than never",
-    "Burning the midnight oil",
-    "Spill the beans",
-    "A stitch in time saves nine",
-    "When pigs fly",
-    "Under the weather",
-    "Piece of cake",           // New idioms
-    "The ball is in your court",
-    "The best of both worlds",
-    "A dime a dozen",
-    "Let the cat out of the bag",
-    "Barking up the wrong tree"
-];
+function sanitizeDomain(domain) {
+  return domain.replace(/[.\$\/:]/g, '_');
+}
 
-// Function to introduce random spelling/grammar errors
-const introduceErrors = (text) => {
-    const errors = [
-        { pattern: /their/g, replacement: "there" },
-        { pattern: /it's/g, replacement: "its" },
-        { pattern: /affect/g, replacement: "effect" },
-        { pattern: /too/g, replacement: "to" },
-        { pattern: /lose/g, replacement: "loose" },
-        { pattern: /your/g, replacement: "you're" },
-        { pattern: /then/g, replacement: "than" },
-        { pattern: /definitely/g, replacement: "definately" },  // New errors
-        { pattern: /separate/g, replacement: "seperate" },
-        { pattern: /occasionally/g, replacement: "occassionally" },
-        { pattern: /received/g, replacement: "recieved" },
-        { pattern: /believe/g, replacement: "beleive" }
-    ];
-    return errors.reduce((result, { pattern, replacement }) => result.replace(pattern, replacement), text);
-};
-
-// Function to add slight conversational filler
-const addFillerWords = (text) => {
-    const fillers = [
-       "you know,", "well,", "basically,", "to be honest,", "like I said,", 
-        "I guess,", "sort of,", "actually,", "you see,", "just saying,", // New fillers
-        "I mean,", "kind of,", "right?"
-    ];
-    const sentences = text.split('.');
-    return sentences.map(sentence => {
-        if (Math.random() < 0.35) {
-            const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
-            return `${randomFiller} ${sentence}`;
-        }
-        return sentence;
-    }).join('. ');
-};
-
-// More aggressive sentence randomization
-const adjustSentenceStructure = (text) => {
-    let sentences = text.split('.');
-    sentences = sentences.map(sentence => {
-        if (Math.random() > 0.6) {
-            return sentence + '. ' + sentences[Math.floor(Math.random() * sentences.length)];  // Insert random sentences from other parts of the text
-        }
-        if (sentence.length > 15 && Math.random() < 0.5) {
-            return sentence.slice(0, sentence.length / 2) + '. ' + sentence.slice(sentence.length / 2);  // Split long sentences
-        }
-        return sentence;
-    });
-    return sentences.join('. ');
-};
-
-// Insert idioms and informal phrases at random positions
-const addIdiomsAndPhrases = (text) => {
-    const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
-    const sentences = text.split('.');
-    const insertIndex = Math.floor(Math.random() * sentences.length);
-    sentences.splice(insertIndex, 0, randomIdiom);
-    return sentences.join('. ');
-};
-
-// Stronger paraphrasing with more variability
-const aggressiveParaphrase = (text) => {
-    return text
-        .replace(/important/g, "crucial")
-        .replace(/difficult/g, "challenging")
-        .replace(/think/g, "believe")
-        .replace(/result/g, "outcome")
-        .replace(/shows/g, "demonstrates")
-        .replace(/However,/g, "Nonetheless,")
-        .replace(/Furthermore,/g, "Moreover,")
-        .replace(/Moreover,/g, "In addition,")
-        .replace(/benefits/g, "advantages")
-        .replace(/utilize/g, "use")
-        .replace(/obtain/g, "get")
-        .replace(/start/g, "begin")
-        .replace(/end/g, "conclude")
-        .replace(/suggest/g, "propose")
-        .replace(/happy/g, "content")
-        .replace(/sad/g, "unhappy");
-};
-// Function to split long input text into smaller chunks
-const splitIntoChunks = (text, chunkSize) => {
-    const words = text.split(/\s+/);
-    let chunks = [];
-    for (let i = 0; i < words.length; i += chunkSize) {
-        chunks.push(words.slice(i, i + chunkSize).join(' '));
-    }
-    return chunks;
-};
-
-// Function to process each chunk and concatenate the final result
-const processInChunks = async (inputText) => {
-    const chunks = splitIntoChunks(inputText, 150); // Split into chunks of 150 words
-    let finalResult = '';
-
-    for (const chunk of chunks) {
-        let chunkHumanized = humanizeTextLocally(chunk);  // Humanize locally first
-        let refinedChunk = await fetchValidatedText(chunkHumanized);  // Refine with OpenAI
-        finalResult += ' ' + refinedChunk;  // Concatenate the results
-    }
-
-    return finalResult.trim();
-};
-// Applying all transformations for humanization
-const humanizeTextLocally = (inputText) => {
-    let text = introduceErrors(inputText);            // Step 1: Introduce random errors
-    text = addFillerWords(text);                      // Step 2: Add conversational fillers
-    text = adjustSentenceStructure(text);             // Step 3: Randomize sentence structure
-    text = aggressiveParaphrase(text);                // Step 4: Aggressively paraphrase content
-    text = addIdiomsAndPhrases(text);                 // Step 5: Insert idioms and phrases
-    return text;
-};
-
-// OpenAI API function for final refinements with corrected randomness
-const fetchValidatedText = async (inputText) => {
-    const url = 'https://api.openai.com/v1/chat/completions';
-    const headers = {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-    };
-
-    const requestData = {
-        model: 'gpt-3.5-turbo',
-        messages: [
-            {
-                role: 'user',
-                content: `Refine this text to sound as if it was written by a human, with randomness, professional and perfections, informal and most professional tone. Ensure it is undetectable by AI content detection tools. Add variability:\n\n${inputText}`
-            }
-        ],
-        max_tokens: 3048,
-        temperature: Math.random() * 0.5 + 0.7,  // Vary temperature between 0.7 and 1.2 for more creativity
-        top_p: Math.min(Math.random() * 0.4 + 0.6, 1),  // Corrected: Ensure top_p never exceeds 1
-        frequency_penalty: 1.5,                  // Encourage variability in words
-        presence_penalty: 1.7                    // Reduce consistent patterns
-    };
-
-    try {
-        const response = await axios.post(url, requestData, { headers });
-        return response.data.choices[0].message.content;
-    } catch (error) {
-        console.error('Error:', error.response ? error.response.data : error.message);
-        throw new Error('Failed to fetch validated text');
-    }
-};
-
-// Function to calculate AI-generated content percentage
-const calculateAIGeneratedPercentage = (originalText, humanizedText) => {
-    const originalWords = originalText.split(/\s+/);
-    const humanizedWords = humanizedText.split(/\s+/);
-    let unchangedWords = 0;
-
-    // Count how many words remained the same
-    for (let i = 0; i < Math.min(originalWords.length, humanizedWords.length); i++) {
-        if (originalWords[i] === humanizedWords[i]) {
-            unchangedWords++;
-        }
-    }
-
-    // Calculate percentage of AI-generated (unchanged) content
-    const aiGeneratedPercentage = (unchangedWords / originalWords.length) * 100;
-    return aiGeneratedPercentage.toFixed(2); // Return a percentage with 2 decimal places
-};
-
-app.post('/humanize', async (req, res) => {
-    const { inputText } = req.body;
-
-    if (!inputText || inputText.trim() === '') {
-        return res.status(400).json({ error: 'Input text cannot be empty' });
-    }
-
-    try {
-        let humanizedText = humanizeTextLocally(inputText);
-        const finalText = await fetchValidatedText(humanizedText);
-
-        // Calculate AI-generated and humanized content percentages
-        const aiGeneratedPercentage = calculateAIGeneratedPercentage(inputText, finalText);
-        const humanizedPercentage = (100 - aiGeneratedPercentage).toFixed(2);
-
-        res.json({ 
-            transformedText: finalText,
-            aiGeneratedPercentage,
-            humanizedPercentage
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Failed to humanize text' });
-    }
+const RegistrationSchema = new mongoose.Schema({
+  domain: { type: String, required: true, unique: true },
+  email: { type: String, required: true }
 });
 
+const Registration = mongoose.models.Registration || mongoose.model('Registration', RegistrationSchema);
+
+// Updated TrackingSchema with country and city
+const TrackingSchema = new mongoose.Schema({
+  url: String,
+  type: String,
+  ip: String,
+  sessionId: String,
+  timestamp: { type: Date, default: Date.now },
+  buttons: { type: Map, of: Number, default: {} },
+  links: { type: Map, of: Number, default: {} },
+  pageviews: [String],
+  sessionStart: { type: Date, default: Date.now },  // Session start time
+  sessionEnd: { type: Date },  // Session end time
+  country: String,  // Added country
+  city: String,      // Added city
+  adBlockerActive: { type: Boolean, default: false }  // New field for ad blocker status
+});
+
+const Tracking = mongoose.models.Tracking || mongoose.model('Tracking', TrackingSchema);
+
+// Register endpoint
+app.post('/api/register', async (req, res) => {
+  const { domain, email } = req.body;
+  try {
+    const registration = new Registration({ domain, email });
+    await registration.save();
+    const collectionName = sanitizeDomain(domain);
+
+    if (!mongoose.models[collectionName]) {
+      mongoose.model(collectionName, TrackingSchema, collectionName);
+    }
+
+    res.status(200).send('Registration successful.');
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).send('Domain already registered.');
+    }
+    console.error('Error registering domain:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Tracking endpoint
+app.post('/api/pageviews', async (req, res) => {
+  const { domain, url, type, sessionId, buttonName, linkName,adBlockerActive  } = req.body;
+
+  // Handle IPs behind proxies
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const cleanedIp = ip.split(',')[0].trim(); // In case multiple IPs are returned
+
+  if (!domain || !url || !cleanedIp || !sessionId) {
+    return res.status(400).send('Domain, URL, IP, and Session ID are required.');
+  }
+
+  try {
+    const collectionName = sanitizeDomain(domain);
+    let Tracking = mongoose.models[collectionName];
+
+    if (!Tracking) {
+      Tracking = mongoose.model(collectionName, TrackingSchema, collectionName);
+    }
+
+    // Fetch geolocation data using ipapi or any other IP-based service
+    const geoLocationUrl = `https://ipapi.co/${cleanedIp}/json/`;
+    let geoLocationData = { country: 'Unknown', city: 'Unknown' };
+
+    try {
+      const response = await axios.get(geoLocationUrl);
+      if (response.data) {
+        geoLocationData = {
+          country: response.data.country_name || 'Unknown',
+          city: response.data.city || 'Unknown'
+        };
+      }
+    } catch (geoError) {
+      console.error('Error fetching geolocation data:', geoError.message);
+    }
+
+    // Check if a document with the same IP and sessionId exists
+    let existingTrackingData = await Tracking.findOne({ ip: cleanedIp, sessionId });
+
+    if (existingTrackingData) {
+      // Merge the new data with the existing data
+      if (type === 'pageview') {
+        if (!existingTrackingData.pageviews.includes(url)) {
+          existingTrackingData.pageviews.push(url);
+        }
+      } else if (type === 'button_click') {
+        const sanitizedButtonName = buttonName ? buttonName.replace(/[.\$]/g, '_') : 'Unnamed Button';
+        existingTrackingData.buttons.set(sanitizedButtonName, (existingTrackingData.buttons.get(sanitizedButtonName) || 0) + 1);
+      } else if (type === 'link_click') {
+        const sanitizedLinkName = linkName ? linkName.replace(/[.\$]/g, '_') : 'Unnamed Link';
+        existingTrackingData.links.set(sanitizedLinkName, (existingTrackingData.links.get(sanitizedLinkName) || 0) + 1);
+      }
+      existingTrackingData.sessionEnd = new Date();  // Update session end time
+      existingTrackingData.adBlockerActive = adBlockerActive;  // Update ad blocker status
+      // Save the merged data
+      await existingTrackingData.save();
+    } else {
+      // Create a new tracking document if no existing one found
+      const newTrackingData = new Tracking({
+        url,
+        type,
+        ip: cleanedIp,
+        sessionId,
+        pageviews: type === 'pageview' ? [url] : [],
+        sessionStart: new Date(),  // Start a new session
+        country: geoLocationData.country,
+        city: geoLocationData.city,
+        adBlockerActive  // Save ad blocker status
+      });
+
+      await newTrackingData.save();
+    }
+
+    res.status(200).send('Tracking data stored successfully');
+  } catch (error) {
+    console.error('Error saving tracking data:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+// Send tracking data to client via email with CSV attachment
+async function sendTrackingDataToClient(domain, email) {
+  const collectionName = sanitizeDomain(domain);
+  let Tracking = mongoose.models[collectionName];
+
+  if (!Tracking) {
+    Tracking = mongoose.model(collectionName, TrackingSchema, collectionName);
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+
+  try {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+    const trackingData = await Tracking.find({
+      timestamp: { $gte: oneDayAgo }
+    }).lean();
+
+    if (!trackingData.length) {
+      console.log(`No tracking data available for ${domain}`);
+      return;
+    }
+
+    // Calculate unique users based on IP addresses
+    const uniqueUsers = new Set(trackingData.map(doc => doc.ip));
+    const userCount = uniqueUsers.size;
+    const adBlockerUsers = trackingData.filter(doc => doc.adBlockerActive).length;
+
+    let totalPageviews = 0;
+    let totalButtonClicks = 0;
+    let totalLinkClicks = 0;
+    let overallDuration = 0;  // To store the total duration of all users
+
+    trackingData.forEach(doc => {
+      totalPageviews += doc.pageviews.length;
+
+      const buttonClicks = doc.buttons instanceof Map ? doc.buttons : new Map(Object.entries(doc.buttons));
+      totalButtonClicks += [...buttonClicks.values()].reduce((sum, count) => sum + count, 0);
+
+      const linkClicks = doc.links instanceof Map ? doc.links : new Map(Object.entries(doc.links));
+      totalLinkClicks += [...linkClicks.values()].reduce((sum, count) => sum + count, 0);
+
+      // Calculate the session duration (if sessionEnd is null, use current time)
+      const sessionDuration = ((doc.sessionEnd ? doc.sessionEnd : new Date()) - doc.sessionStart);
+      overallDuration += sessionDuration; // Add to total duration
+    });
+
+    // Convert overallDuration from milliseconds to hours, minutes, and seconds
+    const totalDurationInSeconds = Math.floor(overallDuration / 1000);
+    const hours = Math.floor(totalDurationInSeconds / 3600);
+    const minutes = Math.floor((totalDurationInSeconds % 3600) / 60);
+    const seconds = totalDurationInSeconds % 60;
+
+    // Prepare data for CSV
+    const csvFields = ['URL', 'Timestamp', 'Pageviews', 'Buttons Clicked', 'Links Clicked', 'Session Duration (seconds)','Session Duration (H:M:S)','Country','City'];
+    // const csvData = trackingData.map(doc => {
+    //   const buttonClicks = doc.buttons instanceof Map ? doc.buttons : new Map(Object.entries(doc.buttons));
+    //   const linkClicks = doc.links instanceof Map ? doc.links : new Map(Object.entries(doc.links));
+
+    //   return {
+    //     URL: doc.url,
+    //     Timestamp: new Date(doc.timestamp).toLocaleString(),
+    //     Pageviews: doc.pageviews.length ? doc.pageviews.join(', ') : 'No pageviews',
+    //     'Buttons Clicked': Object.keys(Object.fromEntries(buttonClicks)).length ? JSON.stringify(Object.fromEntries(buttonClicks)) : 'No button clicks',
+    //     'Links Clicked': Object.keys(Object.fromEntries(linkClicks)).length ? JSON.stringify(Object.fromEntries(linkClicks)) : 'No link clicks',
+    //     'Session Duration (seconds)': Math.floor(((doc.sessionEnd ? doc.sessionEnd : new Date()) - doc.sessionStart) / 1000)
+    //   };
+    // });
+    const csvData = trackingData.map(doc => {
+      const buttonClicks = doc.buttons instanceof Map ? doc.buttons : new Map(Object.entries(doc.buttons));
+      const linkClicks = doc.links instanceof Map ? doc.links : new Map(Object.entries(doc.links));
+      
+      // Calculate the session duration
+      const sessionDurationMs = (doc.sessionEnd ? doc.sessionEnd : new Date()) - doc.sessionStart;
+      const sessionDurationInSeconds = Math.floor(sessionDurationMs / 1000);
+      const hours = Math.floor(sessionDurationInSeconds / 3600);
+      const minutes = Math.floor((sessionDurationInSeconds % 3600) / 60);
+      const seconds = sessionDurationInSeconds % 60;
+    
+      return {
+        URL: doc.url,
+        Timestamp: new Date(doc.timestamp).toLocaleString(),
+        Pageviews: doc.pageviews.length ? doc.pageviews.join(', ') : 'No pageviews',
+        'Buttons Clicked': Object.keys(Object.fromEntries(buttonClicks)).length ? JSON.stringify(Object.fromEntries(buttonClicks)) : 'No button clicks',
+        'Links Clicked': Object.keys(Object.fromEntries(linkClicks)).length ? JSON.stringify(Object.fromEntries(linkClicks)) : 'No link clicks',
+        'Session Duration (seconds)': sessionDurationInSeconds,
+        'Session Duration (H:M:S)': `${hours}h ${minutes}m ${seconds}s`,  // Formatted session duration
+        Country: doc.country || 'Unknown',  // Include country
+        City: doc.city || 'Unknown'         // Include city
+      };
+    });
+    
+
+    // Add the overall total duration (for all users) to the CSV
+    csvData.push({
+      URL: 'Total Duration for All Users',
+      Timestamp: '',
+      Pageviews: '',
+      'Buttons Clicked': '',
+      'Links Clicked': '',
+      'Session Duration (seconds)': `${hours} hours, ${minutes} minutes, ${seconds} seconds`
+    });
+
+    // Convert JSON data to CSV
+    const json2csvParser = new Parser({ fields: csvFields });
+    const csv = json2csvParser.parse(csvData);
+
+    // Write CSV to a file (temporary file location)
+    const filePath = `./daily_tracking_${domain}.csv`;
+    fs.writeFileSync(filePath, csv);
+
+    // Email content
+    let dataText = `Tracking data for ${domain} (Last 24 Hours):\n\n`;
+    dataText += `Total Unique Users: ${userCount}\n`;
+    dataText += `Total Ad Blocker Users: ${adBlockerUsers}\n`;  // Added ad blocker users count
+    dataText += `Total Pageviews: ${totalPageviews}\n`;
+    dataText += `Total Button Clicks: ${totalButtonClicks}\n`;
+    dataText += `Total Link Clicks: ${totalLinkClicks}\n`;
+    dataText += `Overall Duration for All Users: ${hours} hours, ${minutes} minutes, and ${seconds} seconds\n\n`;
+
+    trackingData.forEach(doc => {
+      const buttonClicks = doc.buttons instanceof Map ? doc.buttons : new Map(Object.entries(doc.buttons));
+      const linksObject = doc.links instanceof Map ? doc.links : new Map(Object.entries(doc.links));
+
+      dataText += `URL: ${doc.url}\n`;
+      dataText += `Timestamp: ${new Date(doc.timestamp).toLocaleString()}\n`;
+      dataText += `Pageviews: ${doc.pageviews.length ? doc.pageviews.join(', ') : 'No pageviews'}\n`;
+      dataText += `Buttons Clicked: ${Object.keys(Object.fromEntries(buttonClicks)).length ? JSON.stringify(Object.fromEntries(buttonClicks)) : 'No button clicks'}\n`;
+      dataText += `Links Clicked: ${Object.keys(Object.fromEntries(linksObject)).length ? JSON.stringify(Object.fromEntries(linksObject)) : 'No link clicks'}\n\n`;
+    });
+
+    // Email options with attachment
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: `Daily Tracking Data for ${domain}`,
+      text: dataText || 'No tracking data available.',
+      attachments: [
+        {
+          filename: `daily_tracking_${domain}.csv`,
+          path: filePath
+        }
+      ]
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+    console.log(`Daily tracking data with CSV attachment sent to ${email}`);
+
+    // Clean up the CSV file after sending the email
+    fs.unlinkSync(filePath);
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}
+
+
+// Send daily tracking data to all registered clients
+async function sendDailyTrackingDataToAllClients() {
+  try {
+    const registrations = await Registration.find({});
+    for (const { domain, email } of registrations) {
+      await sendTrackingDataToClient(domain, email);
+    }
+  } catch (error) {
+    console.error('Error sending daily tracking data to clients:', error);
+  }
+}
+
+// Schedule daily email at 9 AM Indian Time
+cron.schedule('0 3 * * *', async () => {
+  console.log('Sending daily tracking data...');
+  await sendDailyTrackingDataToAllClients();
+}, {
+  timezone: 'Asia/Kolkata'
+});
+// Serve dashboard page
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/dashboard.html'));
+});
+
+// Serve other pages
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(path.join(__dirname, 'public/home.html'));
+});
+
+app.get('/tracking.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/tracking.js'));
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
