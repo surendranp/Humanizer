@@ -4,8 +4,21 @@ const outputsPerPage = 1; // Number of outputs per page
 const wordLimit = 500; // Set the word limit to 500
 let isEditMode = false; // To toggle between edit mode and read-only mode
 
+// Show the loader and overlay
+function showLoader() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('loader').style.display = 'block';
+}
+
+// Hide the loader and overlay
+function hideLoader() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('loader').style.display = 'none';
+}
+
 document.getElementById('submitBtn').addEventListener('click', async function () {
     const inputText = document.getElementById('inputText').value;
+    const keywords = document.getElementById('keywordBox').value.split(',').map(keyword => keyword.trim());
 
     // Calculate word count
     const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
@@ -23,7 +36,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         return;
     }
 
-    document.getElementById('loader').style.display = 'block';
+    showLoader();  // Show loader before processing
+
     document.getElementById('humanizedText').value = ''; // Clear previous output
     document.getElementById('outputWordCount').innerText = 'Output Word Count: 0';
     document.getElementById('aiGeneratedPercentage').innerText = 'AI-generated content: 0%';
@@ -45,11 +59,26 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         const data = await response.json();
 
         // Hide loader and display output
-        document.getElementById('loader').style.display = 'none';
+        hideLoader();
+
+        // Ensure keywords are retained in the output
+        let transformedText = data.transformedText;
+
+        // Add keywords to the output
+        keywords.forEach(keyword => {
+            if (inputText.includes(keyword)) {
+                // If keyword exists in the input text, do not alter it in the transformed text
+                const keywordPattern = new RegExp(`\\b${keyword}\\b`, 'g');
+                transformedText = transformedText.replace(keywordPattern, keyword);
+            } else {
+                // Otherwise, add the keyword in a consistent place in the transformed text
+                transformedText = `${transformedText} ${keyword}`;
+            }
+        });
 
         // Store the output with percentages
         outputs.push({
-            transformedText: data.transformedText,
+            transformedText,
             aiGeneratedPercentage: data.aiGeneratedPercentage,
             humanizedPercentage: data.humanizedPercentage
         });
@@ -59,7 +88,7 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         displayOutput();
 
         // Update output word count and percentages
-        const outputWordCount = data.transformedText.trim().split(/\s+/).length;
+        const outputWordCount = transformedText.trim().split(/\s+/).length;
         document.getElementById('outputWordCount').innerText = `Output Word Count: ${outputWordCount}`;
         document.getElementById('aiGeneratedPercentage').innerText = `AI-generated content: ${data.aiGeneratedPercentage}%`;
         document.getElementById('humanizedPercentage').innerText = `Humanized content: ${data.humanizedPercentage}%`;
@@ -70,46 +99,9 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
     } catch (error) {
         console.error('Error:', error);
         showAlert('Error occurred while humanizing the text. Please try again.', 'danger');
-        document.getElementById('loader').style.display = 'none'; // Hide the loader on error
+        hideLoader(); // Hide the loader on error
     }
 });
-
-// Function to show Bootstrap alerts
-function showAlert(message, type) {
-    const alertContainer = document.createElement('div');
-    alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
-    alertContainer.role = 'alert';
-    alertContainer.innerHTML = `
-        ${message}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    `;
-
-    // Set styles to center the alert
-    alertContainer.style.position = 'fixed';
-    alertContainer.style.top = '50%';
-    alertContainer.style.left = '50%';
-    alertContainer.style.transform = 'translate(-50%, -50%)';
-    alertContainer.style.zIndex = '1050'; // Ensure it's above other content
-    alertContainer.style.width = '400px';  // Width set to 300 pixels
-    alertContainer.style.height = '200px'; // Height set to 100 pixels
-    alertContainer.style.overflow = 'hidden'; // Prevent overflow of text
-    alertContainer.style.display = 'flex'; // Use flexbox to center text
-    alertContainer.style.fontSize='24px';
-    alertContainer.style.alignItems = 'center'; // Vertically center
-    alertContainer.style.justifyContent = 'center'; // Horizontally center
-    alertContainer.style.backgroundColor = '#000000a2'; // Set your desired background color here
-    alertContainer.style.color = '#fff'; // Optional: Set text color to white for better contrast
-
-    document.body.appendChild(alertContainer); // Append the alert to the body
-
-    // Automatically remove the alert after 3 seconds
-    setTimeout(() => {
-        $(alertContainer).alert('close');
-    }, 3000);
-}
-
 
 // Display the current output based on the current page
 function displayOutput() {
@@ -197,7 +189,7 @@ document.getElementById('inputText').addEventListener('input', function () {
 document.getElementById('clearBtn').addEventListener('click', function () {
     // Clear the input text
     document.getElementById('inputText').value = '';
-    
+    document.getElementById('keywordBox').value = '';
     // Clear the output text area
     document.getElementById('humanizedText').value = ''; 
 
@@ -232,5 +224,3 @@ document.getElementById('copyBtn').addEventListener('click', function () {
         copyMessage.style.display = 'none'; // Hide after 1.5 seconds
     }, 1500);
 });
-
-// =============================================

@@ -38,29 +38,36 @@
         </div>
     </nav>
 
-    <!-- Tool Section -->
-     <section class="container-fluid pb-5">
+<!-- Tool Section -->
+<section class="container-fluid pb-5">
     <main class="tool ">
         <h1 class="text-center mb-4 text-light pt-3">AI Text Humanizer</h1>
-        <div id="loader"  class="loader" style="display:none;"></div>
+      <!-- Overlay for the loader -->
+<div id="overlay" class="overlay"></div>
+
+<!-- Loader -->
+<div id="loader" class="loader" style="display:none;"></div>
 
         <div class="container">
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <!-- <p class="text-light">Input Text:</p> -->
+                    <!-- Input Text Area -->
                     <textarea id="inputText" class="form-control " rows="15" placeholder="Enter AI-generated text here..." ></textarea>
                     <p id="wordCount" class="mt-2 text-light">Input Word Count: 0</p>
+                    
+                    <!-- Keyword Box -->
+                    <input id="keywordBox" class="form-control mt-2" type="text" placeholder="Enter keywords separated by commas" />
+
                     <button id="submitBtn" class="btn btn-primary mt-2">Humanize</button>
                     <button id="clearBtn" class="btn btn-danger mt-2">Clear</button>
-                    <div id="wordLimitMessage" style="display:none; color:red; margin-top: 2em;">Please enter 500 words are below.</div>
-
+                    <div id="wordLimitMessage" style="display:none; color:red; margin-top: 2em;">Please enter 500 words or below.</div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <!-- <p class="text-light">Humanized Text:</p> -->
-                    <textarea id="humanizedText" class="form-control" rows="15" placeholder="Humanize text display here..." readonly ></textarea>
+                    <!-- Humanized Text Area -->
+                    <textarea id="humanizedText" class="form-control" rows="15" placeholder="Humanized text display here..." readonly ></textarea>
                     <p id="outputWordCount" class="mt-2 text-light">Output Word Count: 0</p>
-                    <div id="paginationControls" class="d-flex justify-content-between   mt-2  paginationControls1" >
-                        <div class="copy  d-flex flex-row flex-wrap w-50 justify-content-around">
+                    <div id="paginationControls" class="d-flex justify-content-between mt-2 paginationControls1">
+                        <div class="copy d-flex flex-row flex-wrap w-50 justify-content-around">
                             <button id="copyBtn" class="btn btn-info mt-2">Copy</button>
                             <span id="copyMessage" style="display:none; color: #ffffff;">Copied!</span>
                             <div class="edit-options ">
@@ -75,29 +82,16 @@
                             <button id="nextPage" class="btn rounded-circle" style="background-color: #48cae4;">
                                 <i class="fa-solid fa-right-long text-light"></i>
                             </button>
-                           
                         </div>
                     </div>
                     <p id="aiGeneratedPercentage" class="mt-2 text-light">AI-generated content: 0%</p>
                     <p id="humanizedPercentage" class="mt-2 text-light">Humanized content: 0%</p>
-                    
                 </div>
             </div>
         </div>
-        
-
     </main>
-<!-- <section class="container bg-light mt-5 text-justify">
-    <p>Hey there! So, the ball's in your court now. Check out our AI Text Humanizer - it's like magic for turning that 
-        robotic AI content into something more real and human-like. It adds in those little quirks and imperfections that make writing 
-        feel authentic, you know? Whether you're trying to sneak past those pesky AI detection tools or just want your text 
-        to sound more relatable, this tool is here to help. No more stiff, unnatural writing - with our platform, every word will 
-        have a personal touch.Great for businesses, writers, anyone who wants their content to 
-        stand out with a unique voice. Give it a shot today and see the difference for yourself!
-        </p>
-</section> -->
-
 </section>
+
 <footer>
     <div class="container-fluid bg-dark h-auto ">
 <div class="row d-flex">
