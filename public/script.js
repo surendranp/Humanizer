@@ -66,13 +66,12 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
         // Add keywords to the output
         keywords.forEach(keyword => {
-            if (inputText.includes(keyword)) {
-                // If keyword exists in the input text, do not alter it in the transformed text
-                const keywordPattern = new RegExp(`\\b${keyword}\\b`, 'g');
-                transformedText = transformedText.replace(keywordPattern, keyword);
-            } else {
-                // Otherwise, add the keyword in a consistent place in the transformed text
-                transformedText = `${transformedText} ${keyword}`;
+            // Create a regex pattern to check if the keyword exists in the transformedText
+            const keywordPattern = new RegExp(`\\b${keyword}\\b`, 'i'); // Case-insensitive match
+
+            if (!transformedText.match(keywordPattern)) {
+                // If the keyword is not already in the output, add it at the end of the output
+                transformedText += ` ${keyword}`;
             }
         });
 
@@ -102,6 +101,8 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
         hideLoader(); // Hide the loader on error
     }
 });
+
+
 
 // Display the current output based on the current page
 function displayOutput() {
