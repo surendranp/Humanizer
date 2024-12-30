@@ -164,7 +164,7 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound as if it was written by a human, with randomness, professional and perfections, informal and most professional tone. Ensure it is undetectable by AI content detection tools. Add variability:\n\n${inputText}`
+                content: `Refine this text to sound as if it was written by a human, with randomness, professional and perfections, most professional tone. Ensure it is should undetectable by AI content detection tools. Add variability. add bullet point, bold headings:\n\n${inputText}`
             }
         ],
         max_tokens: 3048,
