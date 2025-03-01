@@ -289,18 +289,19 @@ const splitIntoChunks = (text, chunkSize) => {
 };
 
 // Function to process each chunk and concatenate the final result
-const processInChunks = async (inputText) => {
-    const chunks = splitIntoChunks(inputText, 150); // Split into chunks of 150 words
+const processInChunks = async (inputText, keywords) => {
+    const chunks = splitIntoChunks(inputText, 150);
     let finalResult = '';
 
     for (const chunk of chunks) {
-        let chunkHumanized = humanizeTextLocally(chunk);  // Humanize locally first
-        let refinedChunk = await fetchValidatedText(chunkHumanized);  // Refine with OpenAI
-        finalResult += ' ' + refinedChunk;  // Concatenate the results
+        let chunkHumanized = humanizeTextLocally(chunk);
+        let refinedChunk = await fetchValidatedText(chunkHumanized, keywords);
+        finalResult += ' ' + refinedChunk;
     }
 
     return finalResult.trim();
 };
+
 // Applying all transformations for humanization
 const humanizeTextLocally = (inputText) => {
     let text = introduceErrors(inputText);            // Step 1: Introduce random errors
@@ -312,7 +313,7 @@ const humanizeTextLocally = (inputText) => {
 };
 
 // OpenAI API function for final refinements with corrected randomness
-const fetchValidatedText = async (inputText) => {
+const fetchValidatedText = async (inputText,keywords = []) => {
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -324,15 +325,16 @@ const fetchValidatedText = async (inputText) => {
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound natural, professional, and human-like. Ensure AI detection tools find it indistinguishable from human writing. Integrate the following keywords naturally into the content, maintaining coherence and flow: ${keywords.join(', ')}.\n\n${inputText}`
-
+                content: `Refine this text to sound natural, professional, and human-like. Ensure AI detection tools find it indistinguishable from human writing. ${
+                    keywords.length > 0 ? `Integrate the following keywords naturally into the content, maintaining coherence and flow: ${keywords.join(', ')}.` : ''
+                }\n\n${inputText}`
             }
         ],
         max_tokens: 3048,
-        temperature: Math.random() * 0.5 + 0.7,  // Vary temperature between 0.7 and 1.2 for more creativity
-        top_p: Math.min(Math.random() * 0.4 + 0.6, 1),  // Corrected: Ensure top_p never exceeds 1
-        frequency_penalty: 1.5,                  // Encourage variability in words
-        presence_penalty: 1.7                    // Reduce consistent patterns
+        temperature: Math.random() * 0.5 + 0.7,
+        top_p: Math.min(Math.random() * 0.4 + 0.6, 1),
+        frequency_penalty: 1.5,
+        presence_penalty: 1.7
     };
 
     try {
@@ -363,7 +365,7 @@ const calculateAIGeneratedPercentage = (originalText, humanizedText) => {
 };
 
 app.post('/humanize', async (req, res) => {
-    const { inputText } = req.body;
+    const { inputText, keywords = [] } = req.body; // Ensure keywords is always an array
 
     if (!inputText || inputText.trim() === '') {
         return res.status(400).json({ error: 'Input text cannot be empty' });
@@ -371,9 +373,8 @@ app.post('/humanize', async (req, res) => {
 
     try {
         let humanizedText = humanizeTextLocally(inputText);
-        const finalText = await fetchValidatedText(humanizedText);
+        const finalText = await fetchValidatedText(humanizedText, keywords);
 
-        // Calculate AI-generated and humanized content percentages
         const aiGeneratedPercentage = calculateAIGeneratedPercentage(inputText, finalText);
         const humanizedPercentage = (100 - aiGeneratedPercentage).toFixed(2);
 
@@ -387,6 +388,7 @@ app.post('/humanize', async (req, res) => {
         res.status(500).json({ error: 'Failed to humanize text' });
     }
 });
+
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
