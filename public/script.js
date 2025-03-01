@@ -66,14 +66,16 @@ document.getElementById('submitBtn').addEventListener('click', async function ()
 
         // Add keywords to the output
         keywords.forEach(keyword => {
-            // Create a regex pattern to check if the keyword exists in the transformedText
-            const keywordPattern = new RegExp(`\\b${keyword}\\b`, 'i'); // Case-insensitive match
-
+            const keywordPattern = new RegExp(`\\b${keyword}\\b`, 'i');
+        
             if (!transformedText.match(keywordPattern)) {
-                // If the keyword is not already in the output, add it at the end of the output
-                transformedText += ` ${keyword}`;
+                const sentences = transformedText.split('. ');
+                const randomIndex = Math.floor(Math.random() * sentences.length);
+                sentences[randomIndex] += ` ${keyword}`; // Insert in a random sentence
+                transformedText = sentences.join('. ');
             }
         });
+        
 
         // Store the output with percentages
         outputs.push({

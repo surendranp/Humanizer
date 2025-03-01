@@ -320,11 +320,12 @@ const fetchValidatedText = async (inputText) => {
     };
 
     const requestData = {
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
         messages: [
             {
                 role: 'user',
-                content: `Refine this text to sound as if it was written by a human, with randomness, professional and perfections, most professional tone. Ensure it is should undetectable by AI content detection tools. Add variability:\n\n${inputText}`
+                content: `Refine this text to sound natural, professional, and human-like. Ensure AI detection tools find it indistinguishable from human writing. Integrate the following keywords naturally into the content, maintaining coherence and flow: ${keywords.join(', ')}.\n\n${inputText}`
+
             }
         ],
         max_tokens: 3048,
